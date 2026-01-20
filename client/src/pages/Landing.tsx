@@ -2,6 +2,7 @@ import { Link, Navigate } from "react-router-dom";
 import { ArrowRight, Target, Trophy, Shield, Rocket, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
@@ -118,6 +119,9 @@ export default function Landing() {
           </Link>
         </nav>
       </footer>
+      <div className="fixed bottom-4 right-4 lg:bottom-8 lg:right-8">
+            <ModeToggle />
+        </div>
     </div>
   );
 }
