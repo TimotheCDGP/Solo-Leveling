@@ -65,5 +65,13 @@
       "status": "ACTIVE",
       "userId": "user-1"
     }
+  ],
+  "users": [
+    {
+      "id": "4615",
+      "name": "abdul",
+      "email": "mounirouabdul40@gmail.com",
+      "password": "test"
+    }
   ]
 }
