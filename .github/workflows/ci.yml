@@ -1,0 +1,125 @@
+name: CI
+
+# CI workflow
+# - démarre le stack via Docker Compose
+# - applique les migrations Prisma
+# - exécute les tests dans le container server
+# - build le client dans son container
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compose-e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        # Récupère le code de la PR/branche
+
+      - name: Check docker compose available
+        run: |
+          # Vérifie que 'docker compose' est disponible sur le runner
+          docker compose version
+
+      - name: Cache npm for server
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-server-${{ hashFiles('server/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-server-
+
+      - name: Cache npm for client
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-client-${{ hashFiles('client/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-client-
+        # Récupère le code de la PR/branche
+
+      - name: Set up Docker Compose
+        uses: docker/setup-buildx-action@v2
+        # Prépare buildx (utile pour construire des images via docker actions)
+
+      - name: Install server deps on runner
+        working-directory: server
+        run: |
+          # Installe les dépendances sur le runner pour réutiliser node_modules via volume
+          npm ci
+
+      - name: Install client deps on runner
+        working-directory: client
+        run: |
+          npm ci
+
+      - name: Build server on runner
+        working-directory: server
+        run: |
+          # Build server (produit /server/dist sur l'hôte pour être monté dans le container)
+          npm run build
+
+      - name: Build client on runner
+        working-directory: client
+        run: |
+          # Build client (produit /client/dist sur l'hôte pour être monté dans le container)
+          npm run build
+
+      - name: Start Docker Compose stack
+        run: |
+          # Build et démarre tous les services définis dans docker-compose.yml
+          docker compose up --build -d
+
+      - name: Wait for server to open port 3000
+        run: |
+          # Attends que le serveur écoute sur le port 3000 (pas besoin d'endpoint /healthz)
+          echo "Waiting for server to listen on port 3000..."
+          for i in {1..60}; do
+            if bash -c 'cat < /dev/tcp/localhost/3000' 2>/dev/null; then
+              echo "Port 3000 is open"
+              break
+            fi
+            sleep 2
+          done
+          # Si le port n'est toujours pas ouvert après la boucle, affiche les logs et échoue
+          if ! bash -c 'cat < /dev/tcp/localhost/3000' 2>/dev/null; then
+            echo "Port 3000 did not open in time - dumping docker-compose ps and logs"
+            docker compose ps || true
+            docker compose logs server || true
+            docker compose logs postgres || true
+            exit 1
+          fi
+
+      - name: Run Prisma migrations (inside server container)
+        run: |
+          # Génère le client Prisma et applique les migrations dans un container temporaire
+          # Le runner a déjà installé les dépendances et elles sont montées en volume
+          docker compose run --rm server sh -c "npx prisma generate && npx prisma migrate deploy"
+
+      - name: Run server tests (inside container)
+        run: |
+          # Exécute les tests (jest) dans le container server (les dépendances sont montées depuis le runner)
+          docker compose exec -T server sh -c "npm run test"
+
+      - name: Build client (inside container)
+        run: |
+          # Build de la partie frontend à l'intérieur du container client (node_modules monté depuis le runner)
+          docker compose exec -T client sh -c "npm run build"
+
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          # Si le job échoue, récupère les logs pour faciliter le debug
+          echo "=== server logs ==="
+          docker compose logs server || true
+          echo "=== postgres logs ==="
+          docker compose logs postgres || true
+
+      - name: Tear down
+        if: always()
+        run: |
+          # Arrête et supprime les conteneurs et volumes créés par docker compose
+          docker compose down -v
