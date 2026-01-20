@@ -4,19 +4,20 @@ import { RequireAuth } from "@/components/RequireAuth";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import Landing from "@/pages/Landing";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Routes Publiques */}
+          <Route path="/" element={<Landing />} />
+
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Routes Protégées */}
           <Route 
-            path="/" 
+            path="/dashboard" 
             element={
               <RequireAuth>
                 <Dashboard />
@@ -24,7 +25,6 @@ function App() {
             } 
           />
 
-          {/* Redirection par défaut (Catch all) */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
