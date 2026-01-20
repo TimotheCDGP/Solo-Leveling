@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { CreateGoalDto, Goal } from '../types/goal';
 
-// J'attends kle back - en cours de dev - sur cette URL
+// TODO:  J'attends le back - en cours de dev - sur cette URL
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export const api = axios.create({
