@@ -34,7 +34,7 @@ export default function Login() {
             <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            Solo Leveling
+            Hunter App
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">

@@ -17,7 +17,7 @@ export default function Landing() {
       <header className="px-4 lg:px-6 h-16 flex items-center border-b backdrop-blur-sm bg-background/80 sticky top-0 z-50">
         <Link className="flex items-center justify-center gap-2" to="/">
           <Trophy className="h-6 w-6 text-primary" />
-          <span className="font-bold text-xl">Solo Leveling</span>
+          <span className="font-bold text-xl">Hunter App</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link to="/login">
@@ -107,7 +107,7 @@ export default function Landing() {
 
       <footer className="flex flex-col gap-2 sm:flex-row py-8 w-full shrink-0 items-center px-4 md:px-6 border-t bg-muted/20">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          © 2026 Solo Leveling. Design inspiré par Sung Jin Woo.
+          © 2026 Hunter App. Design inspiré par Sung Jin Woo.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" to="#">
