@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { GalleryVerticalEnd, Loader2 } from "lucide-react";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
 
 export default function Register() {
   const { register } = useAuth();
@@ -18,66 +18,92 @@ export default function Register() {
     setLoading(true);
     try {
       await register(formData);
-      navigate("/"); // Redirection vers Dashboard après inscription réussie
+      navigate("/");
     } catch (error) {
-      alert("Erreur: Email déjà pris ou serveur éteint.");
+      alert("Erreur: Email déjà utilisé.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Inscription</CardTitle>
-          <CardDescription>Créez votre compte Hunter.</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Nom</Label>
-              <Input 
-                id="name" 
-                placeholder="Sung Jin-Woo" 
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required 
-              />
+    <div className="grid min-h-svh lg:grid-cols-2">
+      <div className="flex flex-col gap-4 p-6 md:p-10">
+        <div className="flex justify-center gap-2 md:justify-start">
+          <Link to="/" className="flex items-center gap-2 font-medium">
+            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+              <GalleryVerticalEnd className="size-4" />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="m@example.com" 
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                required 
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Input 
-                id="password" 
-                type="password" 
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                required 
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button className="w-full" type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              S'inscrire
-            </Button>
-            <p className="text-sm text-center text-muted-foreground">
-              Déjà un compte ? <Link to="/login" className="text-primary hover:underline">Se connecter</Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+            Solo Leveling
+          </Link>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-md shadow-md p-6 rounded-lg">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <h1 className="text-2xl font-bold">Créer un compte</h1>
+                <p className="text-muted-foreground text-sm text-balance">
+                  Rejoignez la guilde et commencez votre progression
+                </p>
+              </div>
+              <div className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Nom</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Sung Jin-Woo"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Mot de passe</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  S'inscrire
+                </Button>
+              </div>
+              <div className="text-center text-sm">
+                Déjà un compte ?{" "}
+                <Link to="/login" className="underline underline-offset-4">
+                  Se connecter
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div className="bg-muted relative hidden lg:block">
+        <img
+          src="https://images.pexels.com/photos/3299386/pexels-photo-3299386.jpeg"
+          alt="Image"
+          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        />
+      </div>
     </div>
   );
 }
