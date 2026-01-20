@@ -35,7 +35,7 @@ export function NavMain({
                   tooltip={item.title} 
                   isActive={isActive}
                 
-                  className="data-[active=true]:bg-black data-[active=true]:text-white hover:data-[active=true]:bg-neutral-800"
+                  className="data-[active=true]:bg-black data-[active=true]:text-white hover:data-[active=true]:bg-neutral-800 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:text-white hover:dark:data-[active=true]:bg-white/20"
                 >
                   <Link to={item.url}>
                     {item.icon && <item.icon />}

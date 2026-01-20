@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default function Login() {
   const { login } = useAuth();
@@ -93,9 +94,12 @@ export default function Login() {
         <img
           src="https://i.pinimg.com/736x/60/c8/b0/60c8b070572634171d55803f5aedf1a4.jpg"
           alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
+      <div className="absolute bottom-4 right-4 lg:bottom-8 lg:right-8">
+            <ModeToggle />
+        </div>
     </div>
   );
 }

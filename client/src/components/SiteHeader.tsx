@@ -8,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { ModeToggle } from "./mode-toggle"
 
 export function SiteHeader() {
   return (
@@ -25,6 +26,9 @@ export function SiteHeader() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+      <div className="flex-left ml-auto">
+            <ModeToggle />
+        </div>
     </header>
   )
 }
