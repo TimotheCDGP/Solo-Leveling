@@ -1,12 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client" 
+  output = "../generated/prisma"
   engineType = "binary"
 }
 
@@ -37,6 +31,7 @@ model User {
 
   goals     Goal[]
   habits    Habit[]
+  steps     Step[]
 
   @@map("users")
 }
@@ -63,30 +58,51 @@ model Goal {
 model Habit {
   id          String     @id @default(uuid())
   title       String
+  name        String
+  frequency   String
+  category    String
   description String?
   userId      String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  habitLogs HabitLog[]
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habitLogs  HabitLog[]
 
   @@map("habits")
   @@index([userId])
 }
 
 model HabitLog {
-  id         String   @id @default(uuid())
-  date       DateTime @default(now())
+  id          String   @id @default(uuid())
+  date        DateTime @default(now())
   isCompleted Boolean  @default(false)
-  habitId    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  habitId     String
+  stepId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  step  Step? @relation(fields: [stepId], references: [id])
 
   @@map("habit_logs")
   @@index([habitId])
   @@index([date])
   @@unique([habitId, date])
+}
+
+model Step {
+  id           String      @id @default(uuid())
+  title        String
+  description  String?
+  userId       String
+  is_completed Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habitLogs   HabitLog[]
+
+  @@map("steps")
+  @@index([userId])
 }
