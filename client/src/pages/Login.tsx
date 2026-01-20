@@ -91,7 +91,7 @@ export default function Login() {
       </div>
       <div className="bg-muted relative hidden lg:block">
         <img
-          src="https://images.pexels.com/photos/3299386/pexels-photo-3299386.jpeg"
+          src="https://i.pinimg.com/736x/60/c8/b0/60c8b070572634171d55803f5aedf1a4.jpg"
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />
