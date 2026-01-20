@@ -1,70 +1,98 @@
-import type { Goal, Priority } from '../types/goal';
+import { 
+  Calendar, Target, 
+  Dumbbell, Wallet, GraduationCap, Heart, Briefcase, Layers,
+  ArrowDown, Minus, ArrowUp
+} from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { Goal, Priority } from "@/types/goal";
+
+const categoryIcons: Record<string, React.ReactNode> = {
+  Sport: <Dumbbell className="h-3 w-3" />,
+  Finance: <Wallet className="h-3 w-3" />,
+  Education: <GraduationCap className="h-3 w-3" />,
+  Santé: <Heart className="h-3 w-3" />,
+  Carrière: <Briefcase className="h-3 w-3" />,
+  Autre: <Layers className="h-3 w-3" />,
+};
+
+const priorityConfig: Record<Priority, { icon: React.ReactNode; style: string }> = {
+  HIGH: { 
+    icon: <ArrowUp className="h-3 w-3" />, 
+    style: "bg-red-500 hover:bg-red-600 text-white border-transparent" 
+  },
+  MEDIUM: { 
+    icon: <Minus className="h-3 w-3" />, 
+    style: "bg-orange-400 hover:bg-orange-500 text-white border-transparent" 
+  },
+  LOW: { 
+    icon: <ArrowDown className="h-3 w-3" />, 
+    style: "bg-green-500 hover:bg-green-600 text-white border-transparent" 
+  },
+};
 
 interface GoalCardProps {
   goal: Goal;
 }
 
-// Fonction pour gérer les couleurs des badges
-const getPriorityColor = (priority: Priority) => {
-  switch (priority) {
-    case 'HIGH':
-      return 'bg-red-100 text-red-800 border-red-200';
-    case 'MEDIUM':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'LOW':
-      return 'bg-green-100 text-green-800 border-green-200';
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-};
+export function GoalCard({ goal }: GoalCardProps) {
+  
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Aucune date";
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
-// Fonction pour formater la date proprement (ex: "20 janv. 2024")
-const formatDate = (dateString: string) => {
-  if (!dateString) return 'Pas de date';
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-};
+  const priorityInfo = priorityConfig[goal.priority];
 
-export default function GoalCard({ goal }: GoalCardProps) {
+  const CategoryIcon = goal.category && categoryIcons[goal.category] 
+    ? categoryIcons[goal.category] 
+    : <Target className="h-3 w-3" />;
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow duration-200 flex flex-col justify-between h-full">
-      
-      {/* --- EN-TÊTE : Titre et Badge --- */}
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="font-bold text-lg text-gray-800 leading-tight">
+    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300 cursor-pointer group border-l-4" style={{ borderLeftColor: goal.priority === 'HIGH' ? '#ef4444' : goal.priority === 'MEDIUM' ? '#fb923c' : '#22c55e' }}>
+        {/* --- EN-TÊTE --- */}
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-bold leading-tight group-hover:text-primary transition-colors line-clamp-1">
           {goal.title}
-        </h3>
-        <span className={`text-xs font-semibold px-2.5 py-0.5 rounded border ${getPriorityColor(goal.priority)}`}>
+        </CardTitle>
+        <Badge className={`ml-2 shrink-0 gap-1 pl-1.5 pr-2 ${priorityInfo.style}`}>
+          {priorityInfo.icon}
           {goal.priority}
-        </span>
-      </div>
+        </Badge>
+      </CardHeader>
 
-      {/* --- CORPS : Description (Optionnel) --- */}
-      {goal.description && (
-        <p className="text-gray-500 text-sm mb-4 line-clamp-2">
-          {goal.description}
+      {/* --- CORPS --- */}
+      <CardContent className="flex-grow">
+        <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
+          {goal.description || "Pas de description pour cet objectif."}
         </p>
-      )}
+      </CardContent>
 
-      {/* --- PIED DE CARTE : Date et Catégorie --- */}
-      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50 text-xs text-gray-400">
-        <div className="flex items-center gap-1">
-          {/* Icône Calendrier SVG simple */}
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+      {/* --- PIED --- */}
+      <CardFooter className="pt-0 text-xs text-muted-foreground flex justify-between items-center border-t bg-muted/20 p-4 mt-auto">
+        <div className="flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5 text-primary/70" />
           <span>{formatDate(goal.deadline || goal.startDate)}</span>
         </div>
-
+        
         {goal.category && (
-          <span className="uppercase tracking-wider font-medium text-gray-300">
-            {goal.category}
-          </span>
+          <div className="flex items-center gap-1.5 font-medium text-foreground/80 bg-background px-2 py-1 rounded-full border shadow-sm">
+            {CategoryIcon}
+            <span>{goal.category}</span>
+          </div>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
