@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: solo-leveling-db
     environment:
       POSTGRES_USER: solodev
       POSTGRES_PASSWORD: solopassword123
@@ -12,17 +9,31 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U solodev"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - solo-network
+
+  server:
+    build: ./server
+    environment:
+      DATABASE_URL: "postgres://solodev:solopassword123@postgres:5432/solo_leveling"
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    volumes:
+      # bind the source and node_modules for faster CI/runtime installs
+      - ./server:/app
+      - ./server/node_modules:/app/node_modules
+
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    volumes:
+      # bind the frontend source and node_modules (useful in CI to reuse host cache)
+      - ./client:/app
+      - ./client/node_modules:/app/node_modules
 
 volumes:
   postgres_data:
-
-networks:
-  solo-network:
-    driver: bridge
