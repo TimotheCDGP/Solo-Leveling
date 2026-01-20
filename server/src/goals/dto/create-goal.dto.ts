@@ -6,6 +6,7 @@ import {
     IsEnum,
 } from 'class-validator';
 import { Priority } from './priority.enum';
+import { GoalStatus } from './goalstatus.enum';
 
 export class CreateGoalDto {
     @IsString()
@@ -21,4 +22,8 @@ export class CreateGoalDto {
 
     @IsEnum(Priority)
     priority: Priority;
+
+    @IsEnum(GoalStatus)
+    @IsOptional()
+    status?: GoalStatus;
 }
