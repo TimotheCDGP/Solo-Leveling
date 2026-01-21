@@ -1,0 +1,71 @@
+name: CD
+
+# CD workflow
+# - build les images server/client
+# - tag par branch+sha pour traçabilité
+# - pousse aussi `latest` lors d'un push sur main
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        # Récupère le code source
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        # Permet le build multi-arch si nécessaire
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        # Installe buildx pour docker/build-push-action
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        # Login vers GHCR en utilisant le token GitHub Actions
+
+      - name: Set image tags
+        id: tags
+        run: |
+          # Prépare des tags lisibles: <branch>-<short-sha>
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)
+          SERVER_TAG=ghcr.io/${GITHUB_REPOSITORY}/server:${BRANCH_NAME}-${SHORT_SHA}
+          CLIENT_TAG=ghcr.io/${GITHUB_REPOSITORY}/client:${BRANCH_NAME}-${SHORT_SHA}
+          echo "SERVER_TAG=$SERVER_TAG" >> $GITHUB_OUTPUT
+          echo "CLIENT_TAG=$CLIENT_TAG" >> $GITHUB_OUTPUT
+
+      - name: Build and push server image (with tags)
+        uses: docker/build-push-action@v4
+        with:
+          context: ./server
+          push: true
+          # Push both branch-sha and (conditionally) latest on main
+          tags: |
+            ${{ steps.tags.outputs.SERVER_TAG }}
+            ${{ github.ref == 'refs/heads/main' && format('ghcr.io/{0}/server:latest', github.repository) || '' }}
+        # Construit et pousse l'image server avec les tags demandés
+
+      - name: Build and push client image (with tags)
+        uses: docker/build-push-action@v4
+        with:
+          context: ./client
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.CLIENT_TAG }}
+            ${{ github.ref == 'refs/heads/main' && format('ghcr.io/{0}/client:latest', github.repository) || '' }}
+        # Construit et pousse l'image client avec les tags demandés

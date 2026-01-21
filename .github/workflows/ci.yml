@@ -1,0 +1,99 @@
+name: CI
+
+# CI workflow
+# - démarre le stack via Docker Compose
+# - applique les migrations Prisma
+# - exécute les tests dans le container server
+# - build le client dans son container
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compose-e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        # Récupère le code de la PR/branche
+
+      - name: Check docker compose available
+        run: |
+          # Vérifie que 'docker compose' est disponible sur le runner
+          docker compose version
+
+      - name: Start Postgres (only)
+        run: |
+          # Start only Postgres first so we can run migrations before starting server
+          docker compose up --build -d postgres
+
+      - name: Wait for Postgres to be ready
+        run: |
+          echo "Waiting for Postgres on 5432..."
+          for i in {1..60}; do
+            if docker compose exec -T postgres pg_isready -U solodev >/dev/null 2>&1; then
+              echo "Postgres is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Postgres did not become ready in time"
+          docker compose ps || true
+          docker compose logs postgres || true
+          exit 1
+
+      - name: Run migrations (in temporary server container)
+        run: |
+          # Use a temporary container to install deps, generate prisma client and apply migrations
+          docker compose run --rm server sh -c "npm ci && npx prisma generate && npx prisma migrate deploy"
+
+      - name: Start server and client
+        run: |
+          docker compose up -d server client
+
+      - name: Wait for server to open port 3000
+        run: |
+          # Attends que le serveur écoute sur le port 3000 (pas besoin d'endpoint /healthz)
+          echo "Waiting for server to listen on port 3000..."
+          for i in {1..60}; do
+            if bash -c 'cat < /dev/tcp/localhost/3000' 2>/dev/null; then
+              echo "Port 3000 is open"
+              break
+            fi
+            sleep 2
+          done
+          # Si le port n'est toujours pas ouvert après la boucle, affiche les logs et échoue
+          if ! bash -c 'cat < /dev/tcp/localhost/3000' 2>/dev/null; then
+            echo "Port 3000 did not open in time - dumping docker-compose ps and logs"
+            docker compose ps || true
+            docker compose logs server || true
+            docker compose logs postgres || true
+            exit 1
+          fi
+
+      - name: Run server tests (in ephemeral container)
+        run: |
+          # Run tests in a temporary container; install dev deps there so tests can run
+          docker compose run --rm server sh -c "npm ci && npm test"
+
+      - name: Build client (in ephemeral container)
+        run: |
+          # Build frontend artifacts inside a temporary client container
+          docker compose run --rm client sh -c "npm ci && npm run build"
+
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          # Si le job échoue, récupère les logs pour faciliter le debug
+          echo "=== server logs ==="
+          docker compose logs server || true
+          echo "=== postgres logs ==="
+          docker compose logs postgres || true
+
+      - name: Tear down
+        if: always()
+        run: |
+          # Arrête et supprime les conteneurs et volumes créés par docker compose
+          docker compose down -v
