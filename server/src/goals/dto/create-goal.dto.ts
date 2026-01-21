@@ -17,6 +17,10 @@ export class CreateGoalDto {
     @IsOptional()
     description?: string;
 
+    @IsString()
+    @IsOptional()
+    category?: string;
+
     @IsDateString()
     deadline: string;
 
