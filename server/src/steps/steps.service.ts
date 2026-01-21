@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStepDto } from './dto/create-step.dto';
+import { UpdateStepDto } from './dto/update-step.dto';
 
 @Injectable()
 export class StepsService {
@@ -45,13 +46,14 @@ export class StepsService {
     });
   }
 
-  async toggle(userId: string, stepId: string) {
+  async toggle(user: any, stepId: string) {
     const step = await this.prisma.step.findUnique({
       where: { id: stepId },
     });
 
     if (!step) throw new NotFoundException('Étape introuvable');
-    if (step.userId !== userId) throw new ForbiddenException('Accès refusé');
+    console.log(user.id, step.userId);
+    if (step.userId !== user.id) throw new ForbiddenException('Accès refusé');
 
     return this.prisma.step.update({
       where: { id: stepId },
@@ -61,15 +63,30 @@ export class StepsService {
     });
   }
 
-  async remove(userId: string, stepId: string) {
+  async update(id: string, updateStepDto: UpdateStepDto) {
+    const step = await this.prisma.step.findUnique({ where: { id } });
+    if (!step) throw new NotFoundException('Étape introuvable');
+
+    return this.prisma.step.update({
+      where: { id },
+      data: {
+        title: updateStepDto.title,
+        description: updateStepDto.description,
+      },
+    });
+  }
+
+  async remove(user: any, stepId: string) {
+    console.log("Trying to delete step:", stepId);
     try {
         const deletedStep = await this.prisma.step.delete({
             where: { 
                 id: stepId,
             }
         });
+
         
-        if (deletedStep.userId !== userId) {
+        if (deletedStep.userId !== user.id) {
              throw new ForbiddenException();
         }
         return deletedStep;
@@ -77,7 +94,7 @@ export class StepsService {
     } catch (error) {
         const step = await this.prisma.step.findUnique({ where: { id: stepId }});
         if (!step) throw new NotFoundException("Étape introuvable");
-        if (step.userId !== userId) throw new ForbiddenException("Accès refusé");
+        if (step.userId !== user.id) throw new ForbiddenException("Accès refusé");
         
         return this.prisma.step.delete({ where: { id: stepId }});
     }

@@ -1,6 +1,4 @@
 import axios from 'axios';
-import type { Goal, CreateGoalDto } from '@/types/goal';
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const api = axios.create({
@@ -20,25 +18,3 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
-export const GoalService = {
-  getAll: async () => {
-    // Le backend utilise le token pour savoir qui est connecté et filtrer les données
-    const response = await api.get<Goal[]>('/goals');
-    return response.data;
-  },
-
-  create: async (goal: CreateGoalDto) => {
-    const payload = { 
-      ...goal, 
-      status: 'TODO', 
-    };
-    
-    const response = await api.post<Goal>('/goals', payload);
-    return response.data;
-  },
-
-  delete: async (id: string) => {
-    await api.delete(`/goals/${id}`);
-  }
-};

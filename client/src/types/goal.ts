@@ -5,7 +5,9 @@ export type GoalStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
 export interface Step {
   id: string;
   title: string;
-  isCompleted: boolean;
+  description?: string;
+  is_completed: boolean;
+  order: number;
   goalId: string;
 }
 
@@ -22,7 +24,6 @@ export interface Goal {
   steps?: Step[];
 }
 
-// Pour la création - sans L'ID, le status, et le userId
 export interface CreateGoalDto {
   title: string;
   description?: string;
@@ -30,4 +31,5 @@ export interface CreateGoalDto {
   priority: Priority;
   startDate: string;
   deadline?: string;
+  steps?: { title: string; description?: string }[];
 }
