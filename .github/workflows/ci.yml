@@ -24,54 +24,34 @@ jobs:
           # Vérifie que 'docker compose' est disponible sur le runner
           docker compose version
 
-      - name: Cache npm for server
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-server-${{ hashFiles('server/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-server-
-
-      - name: Cache npm for client
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-client-${{ hashFiles('client/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-client-
-        # Récupère le code de la PR/branche
-
-      - name: Set up Docker Compose
-        uses: docker/setup-buildx-action@v2
-        # Prépare buildx (utile pour construire des images via docker actions)
-
-      - name: Install server deps on runner
-        working-directory: server
+      - name: Start Postgres (only)
         run: |
-          # Installe les dépendances sur le runner pour réutiliser node_modules via volume
-          npm ci
+          # Start only Postgres first so we can run migrations before starting server
+          docker compose up --build -d postgres
 
-      - name: Install client deps on runner
-        working-directory: client
+      - name: Wait for Postgres to be ready
         run: |
-          npm ci
+          echo "Waiting for Postgres on 5432..."
+          for i in {1..60}; do
+            if docker compose exec -T postgres pg_isready -U solodev >/dev/null 2>&1; then
+              echo "Postgres is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Postgres did not become ready in time"
+          docker compose ps || true
+          docker compose logs postgres || true
+          exit 1
 
-      - name: Build server on runner
-        working-directory: server
+      - name: Run migrations (in temporary server container)
         run: |
-          # Build server (produit /server/dist sur l'hôte pour être monté dans le container)
-          npm run build
+          # Use a temporary container to install deps, generate prisma client and apply migrations
+          docker compose run --rm server sh -c "npm ci && npx prisma generate && npx prisma migrate deploy"
 
-      - name: Build client on runner
-        working-directory: client
+      - name: Start server and client
         run: |
-          # Build client (produit /client/dist sur l'hôte pour être monté dans le container)
-          npm run build
-
-      - name: Start Docker Compose stack
-        run: |
-          # Build et démarre tous les services définis dans docker-compose.yml
-          docker compose up --build -d
+          docker compose up -d server client
 
       - name: Wait for server to open port 3000
         run: |
@@ -93,21 +73,15 @@ jobs:
             exit 1
           fi
 
-      - name: Run Prisma migrations (inside server container)
+      - name: Run server tests (in ephemeral container)
         run: |
-          # Génère le client Prisma et applique les migrations dans un container temporaire
-          # Le runner a déjà installé les dépendances et elles sont montées en volume
-          docker compose run --rm server sh -c "npx prisma generate && npx prisma migrate deploy"
+          # Run tests in a temporary container; install dev deps there so tests can run
+          docker compose run --rm server sh -c "npm ci && npm test"
 
-      - name: Run server tests (inside container)
+      - name: Build client (in ephemeral container)
         run: |
-          # Exécute les tests (jest) dans le container server (les dépendances sont montées depuis le runner)
-          docker compose exec -T server sh -c "npm run test"
-
-      - name: Build client (inside container)
-        run: |
-          # Build de la partie frontend à l'intérieur du container client (node_modules monté depuis le runner)
-          docker compose exec -T client sh -c "npm run build"
+          # Build frontend artifacts inside a temporary client container
+          docker compose run --rm client sh -c "npm ci && npm run build"
 
       - name: Collect logs on failure
         if: failure()
