@@ -19,9 +19,9 @@ export default function Register() {
     setLoading(true);
     try {
       await register(formData);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
-      alert("Erreur: Email déjà utilisé.");
+      alert("Erreur lors de l'inscription");
     } finally {
       setLoading(false);
     }

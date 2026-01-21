@@ -31,9 +31,13 @@ export class AuthService {
       },
     });
 
+    const payload = { sub: user.id, email: user.email };
+  
     // Ne jamais retourner le password
     const { password, ...result } = user;
-    return result;
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    };
   }
 
   async login(dto: LoginDto) {
@@ -54,6 +58,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
+      name: user.name,
     };
 
     return {

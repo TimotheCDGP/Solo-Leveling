@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { AuthService } from "@/services/auth-mock"; //J'utilise le Mock pour l'instant
 import type { LoginDto, RegisterDto, User } from "@/types/auth";
+import { AuthService } from "@/services/auth.service";
 
 interface AuthContextType {
   user: User | null;
@@ -38,13 +38,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (data: LoginDto) => {
     const response = await AuthService.login(data);
     localStorage.setItem("token", response.access_token);
-    setUser(response.user);
+    const userData = await AuthService.getMe();
+    setUser(userData);
   };
 
   const register = async (data: RegisterDto) => {
     const response = await AuthService.register(data);
     localStorage.setItem("token", response.access_token);
-    setUser(response.user);
+    const userData = await AuthService.getMe();
+    setUser(userData);
   };
 
   const logout = () => {

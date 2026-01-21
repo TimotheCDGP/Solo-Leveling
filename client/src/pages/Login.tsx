@@ -19,7 +19,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(formData);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       alert("Email ou mot de passe incorrect");
     } finally {
