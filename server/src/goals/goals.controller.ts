@@ -1,23 +1,26 @@
-import { Body, Controller, Get, Post, Query, DefaultValuePipe, ParseEnumPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, DefaultValuePipe, ParseEnumPipe, UseGuards } from '@nestjs/common';
 import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { GoalStatus } from 'generated/prisma/enums';
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
+import { GetUser } from '../auth/decorators/get-user.decorator';
 
 @Controller('goals')
+@UseGuards(JwtAuthGuard)
 export class GoalsController {
-  constructor(private readonly goalsService: GoalsService) { }
+  constructor(private readonly goalsService: GoalsService) {}
 
   @Post()
   async createGoal(
     @Body() dto: CreateGoalDto,
-    // Ici pour l'instant on simule l'userId pour tests
+    @GetUser() user: { id: string },
   ) {
-    const userId = 'usertest1'; // <-- remplace par l'ID réel de l'utilisateur
-    return this.goalsService.createGoal(dto, userId);
+    return this.goalsService.createGoal(dto, user.id);
   }
 
   @Get()
   async getGoals(
+    @GetUser() user: { id: string },
     @Query(
       'status',
       new DefaultValuePipe(GoalStatus.TODO),
@@ -25,7 +28,6 @@ export class GoalsController {
     )
     status: GoalStatus,
   ) {
-    const userId = 'usertest1';
-    return this.goalsService.findAll(userId, status);
+    return this.goalsService.findAll(user.id, status);
   }
 }
