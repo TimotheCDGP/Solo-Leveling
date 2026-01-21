@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class HabitStepDto {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+}
 
 export class CreateHabitDto {
   @IsString()
@@ -20,4 +27,10 @@ export class CreateHabitDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => HabitStepDto)
+  steps?: HabitStepDto[];
 }

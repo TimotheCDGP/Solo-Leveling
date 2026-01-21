@@ -57,21 +57,42 @@ model Goal {
 }
 
 model Habit {
-  id          String     @id @default(uuid())
-  title       String
-  name        String
-  frequency   String
-  category    String
-  description String?
-  userId      String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id                String       @id @default(uuid())
+  title             String
+  name              String
+  frequency         String       @default("DAILY")
+  category          String
+  description       String?
+  isCompletedToday  Boolean      @default(false)
+  currentStreak     Int          @default(0)
+  lastCompletedAt   DateTime?
+  userId            String
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  habitLogs  HabitLog[]
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps             HabitStep[]
+  habitLogs         HabitLog[]
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @default(now()) @updatedAt
 
   @@map("habits")
   @@index([userId])
+}
+
+model HabitStep {
+  id           String   @id @default(uuid())
+  title        String
+  isCompleted  Boolean  @default(false)
+  habitId      String
+  order        Int      @default(0)
+
+  habit        Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("habit_steps")
+  @@index([habitId])
 }
 
 model HabitLog {
