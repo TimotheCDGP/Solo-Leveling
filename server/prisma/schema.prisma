@@ -49,6 +49,8 @@ model Goal {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  steps       Step[]
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("goals")
@@ -101,6 +103,12 @@ model Step {
   is_completed Boolean     @default(false)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+
+  order       Int      @default(0) // Pour trier (1, 2, 3...)
+
+  // Relation One-to-Many
+  goalId      String
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   habitLogs   HabitLog[]
