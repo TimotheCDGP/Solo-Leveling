@@ -1,15 +1,11 @@
-import { IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class CreateStepDto {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Le titre de l\'étape est obligatoire' })
   title: string;
 
+  @IsOptional()
   @IsString()
-  @IsOptional()
   description?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  is_completed?: boolean;
 }

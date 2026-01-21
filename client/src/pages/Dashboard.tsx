@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SectionCards } from "@/components/SectionCards";
 import { GoalList } from "@/components/GoalList";
 import { ResponsiveGoalDialog } from "@/components/ResponsiveGoalDialog";
-import { GoalService } from "@/services/api";
+import { GoalService } from "@/services/goal.service";
 import type { Goal } from "@/types/goal";
 
 export default function Dashboard() {

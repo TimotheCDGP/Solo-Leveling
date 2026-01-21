@@ -6,6 +6,7 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Landing from "@/pages/Landing";
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "sonner";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           </Routes>
         </AuthProvider>
       </BrowserRouter>
+      <Toaster />
     </ThemeProvider>
   );
 }
