@@ -43,6 +43,7 @@ model Goal {
   priority    Priority   @default(MEDIUM)
   status      GoalStatus @default(TODO)
   description String?
+  category    String?
   userId      String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt

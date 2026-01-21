@@ -12,6 +12,7 @@ export class GoalsService {
             data: {
                 title: dto.title,
                 description: dto.description,
+                category: dto.category,
                 deadline: new Date(dto.deadline),
                 priority: dto.priority,
                 status: status ?? undefined,
