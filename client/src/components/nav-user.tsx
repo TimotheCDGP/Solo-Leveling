@@ -36,8 +36,8 @@ export function NavUser() {
   if (!user) return null
 
   // Fonction pour les initiales
-  const initials = user.name
-    .split(" ")
+  const initials = user?.name
+    ?.split(" ")
     .map((n) => n[0])
     .slice(0, 2)
     .join("")

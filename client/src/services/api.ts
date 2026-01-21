@@ -1,46 +1,37 @@
 import axios from 'axios';
 import type { Goal, CreateGoalDto } from '@/types/goal';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const api = axios.create({
   baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// Fonction utilitaire pour récupérer l'ID depuis le token stocké
-const getCurrentUserId = (): string | null => {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  try {
-    // On décode le token Base64 créé dans auth-mock.ts
-    const decoded = JSON.parse(atob(token));
-    return decoded.id;
-  } catch (error) {
-    console.error("Erreur de décodage token", error);
-    return null;
-  }
-};
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export const GoalService = {
   getAll: async () => {
-    const userId = getCurrentUserId();
-    if (!userId) return []; // Si pas connecté, liste vide
-    
-    // json-server permet de filtrer avec ?userId=...
-    const response = await api.get<Goal[]>(`/goals?userId=${userId}`);
+    // Le backend utilise le token pour savoir qui est connecté et filtrer les données
+    const response = await api.get<Goal[]>('/goals');
     return response.data;
   },
 
   create: async (goal: CreateGoalDto) => {
-    const userId = getCurrentUserId();
-    
-    if (!userId) throw new Error("Utilisateur non connecté");
-
     const payload = { 
       ...goal, 
-      status: 'ACTIVE', 
-      userId: userId, // On utilise l'ID !
-      completedAt: null 
+      status: 'TODO', 
     };
     
     const response = await api.post<Goal>('/goals', payload);

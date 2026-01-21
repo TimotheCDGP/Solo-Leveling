@@ -39,6 +39,7 @@ model User {
 model Goal {
   id          String     @id @default(uuid())
   title       String
+  startDate   DateTime?
   deadline    DateTime?
   priority    Priority   @default(MEDIUM)
   status      GoalStatus @default(TODO)

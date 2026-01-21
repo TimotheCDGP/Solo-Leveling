@@ -22,6 +22,10 @@ export class CreateGoalDto {
     category?: string;
 
     @IsDateString()
+    @IsOptional()
+    startDate?: string;
+
+    @IsDateString()
     deadline: string;
 
     @IsEnum(Priority)
