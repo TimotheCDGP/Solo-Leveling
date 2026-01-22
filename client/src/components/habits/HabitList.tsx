@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { LayoutList } from "lucide-react";
-import { Button } from "@/components/ui/button"; // Gardé pour l'état vide
 import { HabitCard } from "@/components/habits/HabitCard";
 import { HabitService } from "@/services/habit.service";
 import type { Habit } from "@/types/habit";

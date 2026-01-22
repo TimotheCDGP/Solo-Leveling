@@ -12,17 +12,12 @@ services:
 
   server:
     build: ./server
-    environment:
-      DATABASE_URL: "postgres://solodev:solopassword123@postgres:5432/solo_leveling"
-      NODE_ENV: production
+    env_file:
+      - ./server/.env
     ports:
       - "3000:3000"
     depends_on:
       - postgres
-    volumes:
-      # bind the source and node_modules for faster CI/runtime installs
-      - ./server:/app
-      - ./server/node_modules:/app/node_modules
 
   client:
     build: ./client
@@ -30,10 +25,6 @@ services:
       - "5173:5173"
     depends_on:
       - server
-    volumes:
-      # bind the frontend source and node_modules (useful in CI to reuse host cache)
-      - ./client:/app
-      - ./client/node_modules:/app/node_modules
 
 volumes:
   postgres_data:
