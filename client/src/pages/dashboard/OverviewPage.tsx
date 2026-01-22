@@ -19,33 +19,34 @@ export default function OverviewPage() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-700 pb-10">
-      <div className="flex flex-col gap-4 px-1 lg:px-2 mt-2">
-        <h2 className="text-2xl font-bold tracking-tight px-1">Tableau de Bord</h2>
+    <div className="min-h-screen bg-white text-foreground animate-in fade-in duration-500">
+      <div className="flex flex-col gap-6 p-4 md:p-8 lg:px-12">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl font-bold tracking-tight">Tableau de Bord</h2>
+          <p className="text-muted-foreground">Bienvenue, Hunter. Voici votre rapport d'activité.</p>
+        </div>
 
-        <div className="min-h-[70vh] flex-1 rounded-xl bg-muted/30 border p-4 md:p-6 space-y-8 text-foreground">
-          {isLoading || !stats ? (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}
-            </div>
-          ) : (
-            <StatsCards kpis={stats} />
-          )}
+        {isLoading || !stats ? (
+           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+             {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
+           </div>
+        ) : (
+          <StatsCards kpis={stats} />
+        )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-background rounded-xl border shadow-sm overflow-hidden transition-all hover:shadow-md">
-               <ChartRadialProgression xp={stats?.xp ?? 0} rank={stats?.rank ?? "Rang E"} />
-            </div>
-            <div className="bg-background rounded-xl border shadow-sm overflow-hidden transition-all hover:shadow-md">
-               <ChartPieInteractive data={stats?.categoryData ?? []} />
-            </div>
-            
-            <div className="bg-background rounded-xl border shadow-sm transition-all hover:shadow-md overflow-hidden">
-              <ChartBarInteractive data={stats?.priorityData ?? []} />
-            </div>
-            <div className="bg-background rounded-xl border shadow-sm transition-all hover:shadow-md overflow-hidden">
-              <ChartLineInteractive data={stats?.weeklyActivity ?? []} />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-card rounded-xl border border-border/80 shadow-sm overflow-hidden bg-white">
+             <ChartRadialProgression xp={stats?.xp ?? 0} rank={stats?.rank ?? "Rang E"} />
+          </div>
+          <div className="bg-card rounded-xl border border-border/80 shadow-sm overflow-hidden bg-white">
+             <ChartPieInteractive data={stats?.categoryData ?? []} />
+          </div>
+          
+          <div className="bg-card rounded-xl border border-border/80 shadow-sm overflow-hidden bg-white">
+            <ChartBarInteractive data={stats?.priorityData ?? []} />
+          </div>
+          <div className="bg-card rounded-xl border border-border/80 shadow-sm overflow-hidden bg-white">
+            <ChartLineInteractive data={stats?.weeklyActivity ?? []} />
           </div>
         </div>
       </div>

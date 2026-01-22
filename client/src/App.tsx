@@ -10,6 +10,7 @@ import HabitsPage from "./pages/dashboard/HabitsPage";
 import GoalsPage from "./pages/dashboard/GoalsPage";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import OverviewPage from "./pages/dashboard/OverviewPage";
+import ProfilePage from "./pages/dashboard/ProfilePage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Routes Publiques */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -29,19 +31,19 @@ function App() {
                 </RequireAuth>
               } 
             >
-              <Route index element={<Navigate to="/dashboard/Overview" replace />} />
+              <Route index element={<Navigate to="/dashboard/overview" replace />} />
               
-              {/* Sous-routes */}
               <Route path="overview" element={<OverviewPage />} />
               <Route path="goals" element={<GoalsPage />} />
               <Route path="habits" element={<HabitsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
-      <Toaster />
+      <Toaster position="top-right" richColors />
     </ThemeProvider>
   );
 }

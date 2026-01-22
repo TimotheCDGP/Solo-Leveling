@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { config } from 'dotenv';
+import { UsersModule } from 'src/users/users.module';
 config();
 
 @Module({
@@ -15,6 +16,7 @@ config();
         expiresIn: '1d',
       },
     }),
+    UsersModule
   ],
   controllers: [AuthController],
   providers: [

@@ -1,12 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { LoginDto, RegisterDto, User } from "@/types/auth";
 import { AuthService } from "@/services/auth.service";
+import { UserService } from "@/services/user.service";
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (data: LoginDto) => Promise<void>;
   register: (data: RegisterDto) => Promise<void>;
+  updateUser: (data: Partial<User>) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -49,6 +51,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
   };
 
+  /**
+   * Met à jour le profil utilisateur et synchronise l'état global
+   */
+  const updateUser = async (data: Partial<User>) => {
+    try {
+      const updatedData = await UserService.updateProfile(data);
+      
+      setUser((prev) => (prev ? { ...prev, ...updatedData } : null));
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du profil", error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -61,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading, 
         login, 
         register, 
+        updateUser,
         logout, 
         isAuthenticated: !!user 
       }}
@@ -70,7 +87,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook personnalisé pour utiliser le contexte facilement
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
