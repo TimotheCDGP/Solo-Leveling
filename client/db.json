@@ -35,6 +35,43 @@
       "deadline": "2023-12-31T00:00:00.000Z",
       "completedAt": "2023-12-20T10:00:00.000Z",
       "userId": "user-1"
+    },
+    {
+      "id": "602c",
+      "title": "Prendre des cours d'anglais",
+      "priority": "HIGH",
+      "startDate": "2026-01-20T10:24:09.158Z",
+      "status": "ACTIVE",
+      "userId": "user-1"
+    },
+    {
+      "id": "f493",
+      "title": "Tester la features",
+      "description": "Voir le résultat",
+      "category": "Finance",
+      "priority": "MEDIUM",
+      "startDate": "2026-01-20T10:30:50.722Z",
+      "deadline": "2026-01-22T23:00:00.000Z",
+      "status": "ACTIVE",
+      "userId": "user-1"
+    },
+    {
+      "id": "19c3",
+      "title": "tester",
+      "description": "tester",
+      "category": "Education",
+      "priority": "MEDIUM",
+      "startDate": "2026-01-20T10:34:22.385Z",
+      "status": "ACTIVE",
+      "userId": "user-1"
+    }
+  ],
+  "users": [
+    {
+      "id": "4615",
+      "name": "abdul",
+      "email": "mounirouabdul40@gmail.com",
+      "password": "test"
     }
   ]
 }

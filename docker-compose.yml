@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: solo-leveling-db
     environment:
       POSTGRES_USER: solodev
       POSTGRES_PASSWORD: solopassword123
@@ -12,17 +9,22 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U solodev"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - solo-network
+
+  server:
+    build: ./server
+    env_file:
+      - ./server/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
 
 volumes:
   postgres_data:
-
-networks:
-  solo-network:
-    driver: bridge

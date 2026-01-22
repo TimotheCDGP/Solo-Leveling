@@ -1,12 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client" 
+  output = "../generated/prisma"
   engineType = "binary"
 }
 
@@ -32,11 +26,18 @@ model User {
   email     String   @unique
   password  String
   name      String
+  avatar    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  xp        Int      @default(0)
+
+  streak    Int      @default(0)
+  bestStreak Int     @default(0)
+  
   goals     Goal[]
   habits    Habit[]
+  steps     Step[]
 
   @@map("users")
 }
@@ -44,13 +45,19 @@ model User {
 model Goal {
   id          String     @id @default(uuid())
   title       String
+  startDate   DateTime?
   deadline    DateTime?
   priority    Priority   @default(MEDIUM)
   status      GoalStatus @default(TODO)
   description String?
+  category    String?
   userId      String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  xpReward    Int      @default(100)
+
+  steps       Step[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -61,32 +68,84 @@ model Goal {
 }
 
 model Habit {
-  id          String     @id @default(uuid())
-  title       String
-  description String?
-  userId      String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id               String      @id @default(uuid())
+  title            String
+  frequency        String      @default("DAILY")
+  category         String
+  description      String?
+  isCompletedToday Boolean     @default(false)
+  currentStreak    Int         @default(0)
+  lastCompletedAt  DateTime?
+  userId           String
+  
+  xpReward         Int         @default(20)
 
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  habitLogs HabitLog[]
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps            HabitStep[]
+  habitLogs        HabitLog[]
+
+
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   @@map("habits")
   @@index([userId])
 }
 
-model HabitLog {
-  id         String   @id @default(uuid())
-  date       DateTime @default(now())
+model HabitStep {
+  id          String   @id @default(uuid())
+  title       String
   isCompleted Boolean  @default(false)
-  habitId    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  habitId     String
+  order       Int      @default(0)
 
-  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  
+  habitLogs   HabitLog[] 
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("habit_steps")
+  @@index([habitId])
+}
+
+model HabitLog {
+  id          String    @id @default(uuid())
+  date        DateTime  @default(now())
+  isCompleted Boolean   @default(false)
+  habitId     String
+  
+  habitStepId String?   
+  habitStep   HabitStep? @relation(fields: [habitStepId], references: [id])
+
+  habit       Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@map("habit_logs")
   @@index([habitId])
   @@index([date])
-  @@unique([habitId, date])
+}
+
+model Step {
+  id           String      @id @default(uuid())
+  title        String
+  description  String?
+  userId       String
+  is_completed Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  order       Int      @default(0) // Pour trier (1, 2, 3...)
+
+  // Relation One-to-Many
+  goalId      String
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("steps")
+  @@index([userId])
 }
