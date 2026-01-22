@@ -102,10 +102,12 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
 
     try {
       const res = await HabitService.toggleStep(stepId);
-      if (res.parentCompleted && !wasFullyDone) {
+      // backend now returns the full Habit. Use isCompletedToday to detect
+      // whether the parent habit became fully completed or was uncompleted.
+      if (res.isCompletedToday && !wasFullyDone) {
         toast.success(`Routine complétée ! (+${habit.xpReward} XP) 🔥`);
         onRefresh();
-      } else if (!res.parentCompleted && wasFullyDone) {
+      } else if (!res.isCompletedToday && wasFullyDone) {
         onRefresh();
       }
     } catch (err) {
