@@ -19,6 +19,29 @@ jobs:
         uses: actions/checkout@v4
         # Récupère le code de la PR/branche
 
+      - name: Create server .env for CI
+        # Create a minimal server/.env so docker-compose's env_file won't fail on the runner.
+        # Prefer GitHub Secrets when provided, otherwise fall back to the compose defaults.
+        run: |
+          mkdir -p server
+          DB="${{ secrets.CI_DATABASE_URL }}"
+          JWT="${{ secrets.CI_JWT_SECRET }}"
+          NODE_ENV_VAL="${{ secrets.CI_NODE_ENV }}"
+          if [ -z "$DB" ]; then
+            DB="postgres://solodev:solopassword123@postgres:5432/solo_leveling"
+          fi
+          if [ -z "$JWT" ]; then
+            JWT="ci-test-secret"
+          fi
+          if [ -z "$NODE_ENV_VAL" ]; then
+            NODE_ENV_VAL="test"
+          fi
+          cat > server/.env <<EOF
+          DATABASE_URL="$DB"
+          NODE_ENV=$NODE_ENV_VAL
+          JWT_SECRET=$JWT
+          EOF
+
       - name: Check docker compose available
         run: |
           # Vérifie que 'docker compose' est disponible sur le runner
