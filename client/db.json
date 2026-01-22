@@ -1,0 +1,77 @@
+{
+  "goals": [
+    {
+      "id": "uuid-1",
+      "title": "Apprendre le Japonais",
+      "description": "Atteindre le niveau N5 d'ici l'été.",
+      "category": "Education",
+      "priority": "HIGH",
+      "status": "ACTIVE",
+      "startDate": "2024-01-01T00:00:00.000Z",
+      "deadline": "2024-06-30T00:00:00.000Z",
+      "completedAt": null,
+      "userId": "user-1"
+    },
+    {
+      "id": "uuid-2",
+      "title": "Courir un Marathon",
+      "description": "Préparation physique complète.",
+      "category": "Sport",
+      "priority": "MEDIUM",
+      "status": "ACTIVE",
+      "startDate": "2024-02-01T00:00:00.000Z",
+      "deadline": "2024-09-15T00:00:00.000Z",
+      "completedAt": null,
+      "userId": "user-1"
+    },
+    {
+      "id": "uuid-3",
+      "title": "Économiser 5000€",
+      "description": "Pour le voyage en Asie.",
+      "category": "Finance",
+      "priority": "LOW",
+      "status": "COMPLETED",
+      "startDate": "2023-01-01T00:00:00.000Z",
+      "deadline": "2023-12-31T00:00:00.000Z",
+      "completedAt": "2023-12-20T10:00:00.000Z",
+      "userId": "user-1"
+    },
+    {
+      "id": "602c",
+      "title": "Prendre des cours d'anglais",
+      "priority": "HIGH",
+      "startDate": "2026-01-20T10:24:09.158Z",
+      "status": "ACTIVE",
+      "userId": "user-1"
+    },
+    {
+      "id": "f493",
+      "title": "Tester la features",
+      "description": "Voir le résultat",
+      "category": "Finance",
+      "priority": "MEDIUM",
+      "startDate": "2026-01-20T10:30:50.722Z",
+      "deadline": "2026-01-22T23:00:00.000Z",
+      "status": "ACTIVE",
+      "userId": "user-1"
+    },
+    {
+      "id": "19c3",
+      "title": "tester",
+      "description": "tester",
+      "category": "Education",
+      "priority": "MEDIUM",
+      "startDate": "2026-01-20T10:34:22.385Z",
+      "status": "ACTIVE",
+      "userId": "user-1"
+    }
+  ],
+  "users": [
+    {
+      "id": "4615",
+      "name": "abdul",
+      "email": "mounirouabdul40@gmail.com",
+      "password": "test"
+    }
+  ]
+}

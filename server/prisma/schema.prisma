@@ -30,6 +30,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  xp        Int      @default(0)
+
+  streak    Int      @default(0)
+  bestStreak Int     @default(0)
+  
   goals     Goal[]
   habits    Habit[]
   steps     Step[]
@@ -40,6 +45,7 @@ model User {
 model Goal {
   id          String     @id @default(uuid())
   title       String
+  startDate   DateTime?
   deadline    DateTime?
   priority    Priority   @default(MEDIUM)
   status      GoalStatus @default(TODO)
@@ -48,6 +54,10 @@ model Goal {
   userId      String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  xpReward    Int      @default(100)
+
+  steps       Step[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -58,60 +68,65 @@ model Goal {
 }
 
 model Habit {
-  id                String       @id @default(uuid())
-  title             String
-  name              String
-  frequency         String       @default("DAILY")
-  category          String
-  description       String?
-  isCompletedToday  Boolean      @default(false)
-  currentStreak     Int          @default(0)
-  lastCompletedAt   DateTime?
-  userId            String
+  id               String      @id @default(uuid())
+  title            String
+  frequency        String      @default("DAILY")
+  category         String
+  description      String?
+  isCompletedToday Boolean     @default(false)
+  currentStreak    Int         @default(0)
+  lastCompletedAt  DateTime?
+  userId           String
+  
+  xpReward         Int         @default(20)
 
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  steps             HabitStep[]
-  habitLogs         HabitLog[]
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps            HabitStep[]
+  habitLogs        HabitLog[]
 
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @default(now()) @updatedAt
+
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   @@map("habits")
   @@index([userId])
 }
 
 model HabitStep {
-  id           String   @id @default(uuid())
-  title        String
-  isCompleted  Boolean  @default(false)
-  habitId      String
-  order        Int      @default(0)
+  id          String   @id @default(uuid())
+  title       String
+  isCompleted Boolean  @default(false)
+  habitId     String
+  order       Int      @default(0)
 
-  habit        Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  
+  habitLogs   HabitLog[] 
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("habit_steps")
   @@index([habitId])
 }
 
 model HabitLog {
-  id          String   @id @default(uuid())
-  date        DateTime @default(now())
-  isCompleted Boolean  @default(false)
+  id          String    @id @default(uuid())
+  date        DateTime  @default(now())
+  isCompleted Boolean   @default(false)
   habitId     String
-  stepId      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  
+  habitStepId String?   
+  habitStep   HabitStep? @relation(fields: [habitStepId], references: [id])
 
-  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  step  Step? @relation(fields: [stepId], references: [id])
+  habit       Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@map("habit_logs")
   @@index([habitId])
   @@index([date])
-  @@unique([habitId, date])
 }
 
 model Step {
@@ -123,8 +138,13 @@ model Step {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
+  order       Int      @default(0) // Pour trier (1, 2, 3...)
+
+  // Relation One-to-Many
+  goalId      String
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  habitLogs   HabitLog[]
 
   @@map("steps")
   @@index([userId])

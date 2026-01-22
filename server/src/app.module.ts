@@ -14,6 +14,7 @@ import { PrismaModule } from './prisma/prisma.module';
     HabitsModule,
     StepsModule,
     PrismaModule,
+    UsersModule,
   ],
 })
 export class AppModule { }
