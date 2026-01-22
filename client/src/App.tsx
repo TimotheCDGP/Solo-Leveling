@@ -1,12 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAuth } from "@/components/RequireAuth";
-import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Landing from "@/pages/Landing";
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "sonner";
+import HabitsPage from "./pages/dashboard/HabitsPage";
+import GoalsPage from "./pages/dashboard/GoalsPage";
+import DashboardLayout from "./pages/dashboard/DashboardLayout";
 
 function App() {
   return (
@@ -15,7 +17,6 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
-
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
@@ -23,10 +24,17 @@ function App() {
               path="/dashboard" 
               element={
                 <RequireAuth>
-                  <Dashboard />
+                  <DashboardLayout />
                 </RequireAuth>
               } 
-            />
+            >
+              {/* Route par défaut (index) -> Redirige vers goals ou affiche un DashboardOverview */}
+              <Route index element={<Navigate to="/dashboard/goals" replace />} />
+              
+              {/* Sous-routes */}
+              <Route path="goals" element={<GoalsPage />} />
+              <Route path="habits" element={<HabitsPage />} />
+            </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
