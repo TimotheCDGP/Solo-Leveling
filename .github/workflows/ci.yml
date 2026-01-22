@@ -70,7 +70,7 @@ jobs:
       - name: Run migrations (in temporary server container)
         run: |
           # Use a temporary container to install deps, generate prisma client and apply migrations
-          docker compose run --rm server sh -c "npm ci && npx prisma generate && npx prisma migrate deploy"
+          docker compose run --rm server sh -c 'if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi && npx prisma generate && npx prisma migrate deploy'
 
       - name: Start server and client
         run: |
@@ -99,12 +99,18 @@ jobs:
       - name: Run server tests (in ephemeral container)
         run: |
           # Run tests in a temporary container; install dev deps there so tests can run
-          docker compose run --rm server sh -c "npm ci && npm test"
+          docker compose run --rm server sh -c 'if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi && npm test'
 
-      - name: Build client (in ephemeral container)
+      - name: Build client (on runner)
         run: |
-          # Build frontend artifacts inside a temporary client container
-          docker compose run --rm client sh -c "npm ci && npm run build"
+          # Build frontend artifacts on the runner (uses checked-out source)
+          cd client
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
+          npm run build
 
       - name: Collect logs on failure
         if: failure()
