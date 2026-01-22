@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { GoalCard } from "@/components/GoalCard";
+import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalDetailModal } from "@/components/goals/GoalDetailModal"; 
 import type { Goal } from "@/types/goal";
 

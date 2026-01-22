@@ -22,7 +22,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-import { CreateGoalForm } from "@/components/CreateGoalForm";
+import { CreateGoalForm } from "@/components/goals/CreateGoalForm";
 
 export function ResponsiveGoalDialog({
   onSuccess,
@@ -30,15 +30,13 @@ export function ResponsiveGoalDialog({
   onSuccess: () => void;
 }) {
   const [open, setOpen] = React.useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)"); // Point de rupture Tablette/PC
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  // Si le formulaire réussit, on ferme le tiroir/dialogue et on notifie le parent
   const handleSuccess = () => {
     setOpen(false);
     onSuccess();
   };
 
-  // --- VERSION DESKTOP (Dialog) ---
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -61,12 +59,10 @@ export function ResponsiveGoalDialog({
     );
   }
 
-  // --- VERSION MOBILE (Drawer / Bottom Sheet) ---
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        {/* Bouton Flottant (FAB) plus accessible sur mobile en bas à droite, 
-            mais ici on garde le bouton standard pour l'instant */}
+
         <Button>
           <Plus className="mr-2 h-4 w-4" /> Nouvel Objectif
         </Button>

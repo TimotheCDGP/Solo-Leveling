@@ -3,7 +3,6 @@ import type { CreateGoalDto, Goal } from "@/types/goal";
 
 export const GoalService = {
   getAll: async () => {
-    // Le backend utilise le token pour savoir qui est connecté et filtrer les données
     const response = await api.get<Goal[]>('/goals');
     return response.data;
   },

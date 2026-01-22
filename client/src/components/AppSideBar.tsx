@@ -4,7 +4,7 @@ import * as React from "react"
 import {
   LayoutDashboard,
   Target,
-  Shield,
+  Flame, // 👈 Changement ici (plus logique pour les habitudes)
   Settings,
   Trophy,
   Sparkles,
@@ -23,23 +23,22 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-// Données de navigation
 const data = {
   navMain: [
     {
-      title: "Tableau de bord",
-      url: "#",
+      title: "Vue d'ensemble",
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
       title: "Mes Objectifs",
-      url: "/dashboard",
+      url: "/dashboard/goals",
       icon: Target,
     },
     {
-      title: "Habitudes (Bientôt)",
-      url: "#",
-      icon: Shield,
+      title: "Mes Habitudes",
+      url: "/dashboard/habits",
+      icon: Flame,
     },
     {
       title: "Boutique (Bientôt)",
@@ -61,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Trophy className="size-4" />
                 </div>
