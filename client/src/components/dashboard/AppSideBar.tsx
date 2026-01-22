@@ -4,9 +4,8 @@ import * as React from "react"
 import {
   LayoutDashboard,
   Target,
-  Flame, // 👈 Changement ici (plus logique pour les habitudes)
+  Flame,
   Settings,
-  Trophy,
   Sparkles,
   Zap,
 } from "lucide-react"

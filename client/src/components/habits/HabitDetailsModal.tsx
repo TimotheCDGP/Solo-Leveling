@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { format, parseISO, isSameDay } from "date-fns";
+import { parseISO, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -13,17 +13,14 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
-} from "@/components/ui/select"; 
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 
 import { 
   Quote, CheckCircle2, RotateCcw, Loader2, 
-  ChevronLeft, Pencil, Save, X, Flame, Trash2,
-  Heart, Zap, Leaf, Brain, LayoutGrid, Calendar as CalendarIcon, Plus, Check, Lock
+  ChevronLeft, Pencil, Save, Flame, Trash2,
+  Heart, Zap, Leaf, Brain, LayoutGrid, Plus, Lock
 } from "lucide-react";
 
 import { HabitService } from "@/services/habit.service"; 
@@ -43,8 +40,7 @@ export function HabitDetailsModal({ habit: initialHabit, isOpen, onClose, onUpda
   const [newStepTitle, setNewStepTitle] = useState("");
   const [isAddingStep, setIsAddingStep] = useState(false);
 
-  const [editingStepId, setEditingStepId] = useState<string | null>(null);
-  const [tempStepTitle, setTempStepTitle] = useState("");
+  const [editingStepId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<{
     title: string;
@@ -52,8 +48,6 @@ export function HabitDetailsModal({ habit: initialHabit, isOpen, onClose, onUpda
     category: string;
   }>({ title: "", description: "", category: "Santé" });
 
-  // CRUCIAL : Met à jour l'état interne dès que la prop habit change
-  // C'est ce qui permet au calendrier de réagir si tu valides depuis la liste
   useEffect(() => {
     if (initialHabit) {
       setHabit(initialHabit);
@@ -123,21 +117,6 @@ export function HabitDetailsModal({ habit: initialHabit, isOpen, onClose, onUpda
     } catch (e) {
         toast.error("Erreur de mise à jour de l'étape");
     }
-  };
-
-  const saveStepTitle = async (stepId: string) => {
-    if (!tempStepTitle.trim() || !habit) {
-        setEditingStepId(null);
-        return;
-    }
-    try {
-        await HabitService.updateStep(stepId, tempStepTitle);
-        const updatedSteps = habit.steps.map(s => s.id === stepId ? { ...s, title: tempStepTitle } : s);
-        const newHabitState = { ...habit, steps: updatedSteps };
-        setHabit(newHabitState);
-        onUpdate(newHabitState);
-        setEditingStepId(null);
-    } catch (e) { toast.error("Erreur modification"); }
   };
 
   const handleAddStep = async () => {
