@@ -1,7 +1,6 @@
 import {
   ChevronsUpDown,
   LogOut,
-  Sparkles,
   BadgeCheck,
   CreditCard,
   Bell,
@@ -10,7 +9,6 @@ import {
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@/components/ui/avatar"
 import {
   DropdownMenu,
