@@ -2,7 +2,7 @@ import { Link, Navigate } from "react-router-dom";
 import { ArrowRight, Target, Trophy, Shield, Rocket, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/mode-toggle";
+import { ModeToggle } from "@/components/dashboard/mode-toggle";
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();

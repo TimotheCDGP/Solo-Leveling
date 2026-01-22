@@ -31,6 +31,9 @@ model User {
 
   xp        Int      @default(0)
 
+  streak    Int      @default(0)
+  bestStreak Int     @default(0)
+  
   goals     Goal[]
   habits    Habit[]
   steps     Step[]
@@ -50,6 +53,8 @@ model Goal {
   userId      String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  xpReward    Int      @default(100)
 
   steps       Step[]
 
@@ -72,11 +77,12 @@ model Habit {
   lastCompletedAt  DateTime?
   userId           String
   
-  xpReward         Int         @default(10)
+  xpReward         Int         @default(20)
 
   user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   steps            HabitStep[]
   habitLogs        HabitLog[]
+
 
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt

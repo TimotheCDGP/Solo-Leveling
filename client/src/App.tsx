@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import HabitsPage from "./pages/dashboard/HabitsPage";
 import GoalsPage from "./pages/dashboard/GoalsPage";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
+import OverviewPage from "./pages/dashboard/OverviewPage";
 
 function App() {
   return (
@@ -28,10 +29,10 @@ function App() {
                 </RequireAuth>
               } 
             >
-              {/* Route par défaut (index) -> Redirige vers goals ou affiche un DashboardOverview */}
-              <Route index element={<Navigate to="/dashboard/goals" replace />} />
+              <Route index element={<Navigate to="/dashboard/Overview" replace />} />
               
               {/* Sous-routes */}
+              <Route path="overview" element={<OverviewPage />} />
               <Route path="goals" element={<GoalsPage />} />
               <Route path="habits" element={<HabitsPage />} />
             </Route>

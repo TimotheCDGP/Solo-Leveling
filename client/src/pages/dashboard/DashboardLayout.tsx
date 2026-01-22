@@ -1,6 +1,6 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSideBar";
-import { SiteHeader } from "@/components/SiteHeader";
+import { AppSidebar } from "@/components/dashboard/AppSideBar";
+import { SiteHeader } from "@/components/dashboard/SiteHeader";
 import { Outlet } from "react-router-dom"; // 👈 L'élément magique
 
 export default function DashboardLayout() {

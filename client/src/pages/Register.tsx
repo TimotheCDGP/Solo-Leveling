@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ModeToggle } from "@/components/mode-toggle";
+import { ModeToggle } from "@/components/dashboard/mode-toggle";
 
 export default function Register() {
   const { register } = useAuth();
