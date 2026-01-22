@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateHabitDto } from './dto/create-habit.dto';
 
@@ -27,7 +27,7 @@ export class HabitsService {
       where: { userId },
       include: { 
         steps: { orderBy: { order: 'asc' } },
-        habitLogs: true //
+        habitLogs: true 
       }, 
       orderBy: { createdAt: 'desc' },
     });
@@ -72,6 +72,10 @@ export class HabitsService {
     });
   }
 
+  /**
+   * Toggle une étape spécifique
+   * Mis à jour pour renvoyer l'Habit COMPLET
+   */
   async toggleHabitStep(stepId: string, userId: string) {
     const step = await this.prisma.habitStep.findUnique({
       where: { id: stepId },
@@ -82,11 +86,14 @@ export class HabitsService {
     if (step.habit.userId !== userId) throw new NotFoundException('Access denied');
 
     const newStatus = !step.isCompleted;
-
     const otherSteps = step.habit.steps.filter(s => s.id !== stepId);
     const allStepsCompleted = otherSteps.every(s => s.isCompleted) && newStatus === true;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     return this.prisma.$transaction(async (tx) => {
+      // 1. Update de l'étape
       await tx.habitStep.update({
         where: { id: stepId },
         data: { isCompleted: newStatus },
@@ -94,6 +101,7 @@ export class HabitsService {
 
       const habit = step.habit;
       
+      // 2. Si TOUTES les étapes sont finies : On valide l'Habit et on crée un LOG
       if (allStepsCompleted && !habit.isCompletedToday) {
         await tx.habit.update({
           where: { id: habit.id },
@@ -101,6 +109,7 @@ export class HabitsService {
             isCompletedToday: true,
             currentStreak: { increment: 1 },
             lastCompletedAt: new Date(),
+            habitLogs: { create: { date: new Date() } }
           },
         });
         
@@ -109,15 +118,18 @@ export class HabitsService {
             data: { xp: { increment: habit.xpReward } }
         });
       }
-      
+      // 3. Si on décoche une étape alors que l'Habit était fini : On dévalide et supprime le LOG
       else if (!allStepsCompleted && habit.isCompletedToday) {
         await tx.habit.update({
           where: { id: habit.id },
           data: {
             isCompletedToday: false,
             currentStreak: { decrement: 1 },
-
           },
+        });
+
+        await tx.habitLog.deleteMany({
+          where: { habitId: habit.id, date: { gte: today } }
         });
 
         await tx.user.update({
@@ -126,43 +138,69 @@ export class HabitsService {
         });
       }
 
-      return { stepId, isCompleted: newStatus, parentCompleted: allStepsCompleted };
+      // RETOUR : On renvoie l'habit complet pour le Frontend
+      return tx.habit.findUnique({
+        where: { id: habit.id },
+        include: { steps: { orderBy: { order: 'asc' } }, habitLogs: true }
+      });
     });
   }
 
+  /**
+   * Toggle l'habitude globale
+   */
   async toggleHabit(habitId: string, userId: string) {
-    const habit = await this.prisma.habit.findUnique({ where: { id: habitId } });
+    const habit = await this.prisma.habit.findUnique({ 
+      where: { id: habitId },
+      include: { steps: true, habitLogs: true }
+    });
+
     if (!habit || habit.userId !== userId) throw new NotFoundException();
 
-    const countSteps = await this.prisma.habitStep.count({ where: { habitId } });
-    if (countSteps > 0) {
-        throw new Error("Cannot toggle complex habit directly, use steps");
+    if (habit.steps.length > 0) {
+      const allStepsCompleted = habit.steps.every(s => s.isCompleted);
+      if (!habit.isCompletedToday && !allStepsCompleted) {
+        throw new BadRequestException("Toutes les étapes doivent être validées avant de terminer la mission.");
+      }
     }
 
     const newStatus = !habit.isCompletedToday;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     return this.prisma.$transaction(async (tx) => {
-        if (newStatus) {
-            await tx.habit.update({
-                where: { id: habitId },
-                data: { isCompletedToday: true, currentStreak: { increment: 1 }, lastCompletedAt: new Date() }
-            });
-            await tx.user.update({ where: { id: userId }, data: { xp: { increment: habit.xpReward } } });
-        } else {
-            await tx.habit.update({
-                where: { id: habitId },
-                data: { isCompletedToday: false, currentStreak: { decrement: 1 } }
-            });
-            await tx.user.update({ where: { id: userId }, data: { xp: { decrement: habit.xpReward } } });
-        }
-        return { id: habitId, isCompletedToday: newStatus };
+      if (newStatus) {
+        await tx.habit.update({
+          where: { id: habitId },
+          data: { 
+            isCompletedToday: true, 
+            currentStreak: { increment: 1 }, 
+            lastCompletedAt: new Date(),
+            habitLogs: { create: { date: new Date() } }
+          }
+        });
+        await tx.user.update({ where: { id: userId }, data: { xp: { increment: habit.xpReward } } });
+      } else {
+        await tx.habit.update({
+          where: { id: habitId },
+          data: { isCompletedToday: false, currentStreak: { decrement: 1 } }
+        });
+        await tx.habitLog.deleteMany({
+          where: { habitId, date: { gte: today } }
+        });
+        await tx.user.update({ where: { id: userId }, data: { xp: { decrement: habit.xpReward } } });
+      }
+
+      return tx.habit.findUnique({
+        where: { id: habitId },
+        include: { steps: { orderBy: { order: 'asc' } }, habitLogs: true }
+      });
     });
   }
 
   async remove(id: string, userId: string) {
     const habit = await this.prisma.habit.findUnique({ where: { id } });
     if (!habit || habit.userId !== userId) throw new NotFoundException();
-
     return this.prisma.habit.delete({ where: { id } });
   }
 
@@ -176,7 +214,8 @@ export class HabitsService {
         title: data.title,
         description: data.description,
         category: data.category,
-      }
+      },
+      include: { steps: true, habitLogs: true }
     });
   }
 }

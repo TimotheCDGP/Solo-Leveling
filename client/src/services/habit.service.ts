@@ -12,15 +12,15 @@ export const HabitService = {
     return res.data;
   },
 
-  // Toggle pour une habitude SIMPLE
-  toggleHabit: async (id: string): Promise<{ isCompletedToday: boolean }> => {
-    const res = await api.patch(`/habits/${id}`);
+  // Toggle pour une habitude (Renvoie l'habit complet pour mettre à jour logs/streaks)
+  toggleHabit: async (id: string): Promise<Habit> => {
+    const res = await api.patch<Habit>(`/habits/${id}`);
     return res.data;
   },
 
-  // Toggle pour une SOUS-ÉTAPE
-  toggleStep: async (stepId: string): Promise<{ stepId: string, isCompleted: boolean, parentCompleted: boolean }> => {
-    const res = await api.patch(`/habits/step/${stepId}`);
+  // Toggle pour une SOUS-ÉTAPE (Renvoie aussi l'habit complet pour le calendrier)
+  toggleStep: async (stepId: string): Promise<Habit> => {
+    const res = await api.patch<Habit>(`/habits/step/${stepId}`);
     return res.data;
   },
 
@@ -33,17 +33,17 @@ export const HabitService = {
     await api.delete(`/habits/${id}`);
   },
 
-  addStep: async (habitId: string, title: string) => {
+  addStep: async (habitId: string, title: string): Promise<any> => {
     const res = await api.post(`/habits/${habitId}/steps`, { title });
     return res.data;
   },
 
-  deleteStep: async (stepId: string) => {
+  deleteStep: async (stepId: string): Promise<void> => {
     await api.delete(`/habits/steps/${stepId}`);
   },
 
-  updateStep: async (stepId: string, title: string) => {
+  updateStep: async (stepId: string, title: string): Promise<any> => {
     const res = await api.patch(`/habits/steps/${stepId}`, { title });
     return res.data;
-    },
+  },
 };

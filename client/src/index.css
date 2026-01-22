@@ -59,3 +59,36 @@
     color: hsl(var(--foreground));
   }
 }
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200..900&family=Oswald:wght@700;900&display=swap");
+
+@layer base {
+  :root {
+    /* On définit les variables CSS de base */
+    --font-system: "Oswald", sans-serif;
+    --font-body: "Inter", sans-serif;
+  }
+
+  body {
+    @apply font-inter antialiased;
+  }
+
+  /* Force le style sur tous les titres de l'application */
+  h1, h2, h3, h4, .hunter-title {
+    @apply font-oswald uppercase italic font-black tracking-tighter;
+
+    padding-right: 0.15em; 
+    /* Parfois un léger débordement à gauche peut arriver aussi */
+    padding-left: 0.05em;
+  }
+
+  /* Style global pour les boutons d'action "Système" */
+  .btn-system {
+    @apply font-oswald uppercase italic font-black tracking-wider transition-all duration-300;
+  }
+  
+  /* Style global pour les labels de formulaires */
+  label {
+    @apply uppercase text-[10px] font-bold tracking-widest text-muted-foreground;
+  }
+}

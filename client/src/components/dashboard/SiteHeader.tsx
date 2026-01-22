@@ -18,7 +18,7 @@ export function SiteHeader() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem className="hidden md:block">
-            <BreadcrumbLink href="#">Hunter App</BreadcrumbLink>
+            <BreadcrumbLink href="#">Hunter Leveling</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="hidden md:block" />
           <BreadcrumbItem>
