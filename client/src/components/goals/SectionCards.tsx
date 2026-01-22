@@ -43,7 +43,7 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
         </CardHeader>
         <CardContent>
           <div className="flex items-end gap-2">
-             {renderValue(`${stats?.totalXp || 0} XP`)}
+             {renderValue(`${stats?.xp || 0} XP`)}
           </div>
           <div className="flex items-center gap-1.5 mt-1 text-xs font-medium text-primary">
              <Trophy className="h-3 w-3" />
