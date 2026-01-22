@@ -26,10 +26,13 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  const isRoutine = habit.steps && habit.steps.length > 0;
-  const totalSteps = habit.steps.length;
-  const completedSteps = habit.steps.filter(s => s.isCompleted).length;
-  const progress = isRoutine ? (completedSteps / totalSteps) * 100 : (habit.isCompletedToday ? 100 : 0);
+  // guard against undefined steps coming from API/client
+  const steps = habit.steps ?? [];
+  const isRoutine = steps.length > 0;
+  const totalSteps = steps.length;
+  const completedSteps = steps.filter(s => s.isCompleted).length;
+  // avoid division by zero with a safe fallback
+  const progress = isRoutine ? (completedSteps / (totalSteps || 1)) * 100 : (habit.isCompletedToday ? 100 : 0);
 
   const getCategoryIcon = (cat: string) => {
     switch(cat) {
@@ -54,46 +57,59 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
   const handleToggleHabit = async () => {
     if (isLoading) return;
     const oldState = habit.isCompletedToday;
-    
-    setHabit(prev => ({ 
-        ...prev, 
-        isCompletedToday: !prev.isCompletedToday,
-        currentStreak: !prev.isCompletedToday ? prev.currentStreak + 1 : Math.max(0, prev.currentStreak - 1)
+
+    setIsLoading(true);
+    setHabit((prev) => ({
+      ...prev,
+      isCompletedToday: !prev.isCompletedToday,
+      currentStreak: !prev.isCompletedToday ? prev.currentStreak + 1 : Math.max(0, prev.currentStreak - 1),
     }));
 
     try {
       await HabitService.toggleHabit(habit.id);
       onRefresh();
       if (!oldState) toast.success(`Habitude validée ! (+${habit.xpReward} XP) 🔥`);
-    } catch (error) {
+    } catch (err) {
+      // log to help debugging while avoiding unused variable lint errors
+  console.error(err);
       setHabit(initialHabit);
       toast.error("Erreur connexion");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleToggleStep = async (stepId: string) => {
-    const newSteps = habit.steps.map(s => s.id === stepId ? { ...s, isCompleted: !s.isCompleted } : s);
-    const newCompletedCount = newSteps.filter(s => s.isCompleted).length;
-    const isNowFullyDone = newCompletedCount === totalSteps;
+    // use the current steps from habit (guarded) to avoid undefined issues
+    const currentSteps = habit.steps ?? [];
+    const newSteps = currentSteps.map((s) => (s.id === stepId ? { ...s, isCompleted: !s.isCompleted } : s));
+    const newCompletedCount = newSteps.filter((s) => s.isCompleted).length;
+    const totalStepsLocal = newSteps.length;
+    const isNowFullyDone = newCompletedCount === totalStepsLocal;
     const wasFullyDone = habit.isCompletedToday;
 
-    setHabit(prev => ({
-        ...prev,
-        steps: newSteps,
-        isCompletedToday: isNowFullyDone,
-        currentStreak: (isNowFullyDone && !wasFullyDone) ? prev.currentStreak + 1 : 
-                       (!isNowFullyDone && wasFullyDone) ? prev.currentStreak - 1 : prev.currentStreak
+    setHabit((prev) => ({
+      ...prev,
+      steps: newSteps,
+      isCompletedToday: isNowFullyDone,
+      currentStreak:
+        isNowFullyDone && !wasFullyDone
+          ? prev.currentStreak + 1
+          : !isNowFullyDone && wasFullyDone
+          ? Math.max(0, prev.currentStreak - 1)
+          : prev.currentStreak,
     }));
 
     try {
       const res = await HabitService.toggleStep(stepId);
       if (res.parentCompleted && !wasFullyDone) {
-          toast.success(`Routine complétée ! (+${habit.xpReward} XP) 🔥`);
-          onRefresh();
+        toast.success(`Routine complétée ! (+${habit.xpReward} XP) 🔥`);
+        onRefresh();
       } else if (!res.parentCompleted && wasFullyDone) {
-          onRefresh();
+        onRefresh();
       }
-    } catch (error) {
+    } catch (err) {
+  console.error(err);
       setHabit(initialHabit);
     }
   };

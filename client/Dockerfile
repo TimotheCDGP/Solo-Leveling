@@ -1,7 +1,7 @@
 # Build stage
 FROM node:20-alpine AS build
 WORKDIR /app
-COPY package.json package-lock.json* tsconfig*.json vite.config.ts index.html ./
+COPY package.json package-lock.json* tsconfig*.json vite.config.ts index.html tailwind.config.js postcss.config.js ./
 COPY public ./public
 COPY src ./src
 RUN npm ci || npm install

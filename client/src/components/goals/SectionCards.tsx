@@ -1,4 +1,4 @@
-import { Target, CheckCircle2, Zap, Trophy, Flame } from "lucide-react";
+import { Target, Zap, Trophy, Flame } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DashboardStats } from "@/types/dashboard";

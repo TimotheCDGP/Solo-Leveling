@@ -1,5 +1,6 @@
 import { api } from "./api";
 import type { User } from "@/types/auth";
+
 import type { DashboardStats } from "@/types/dashboard";
 
 export const UserService = {
