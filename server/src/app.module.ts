@@ -5,6 +5,7 @@ import { GoalsModule } from './goals/goals.module';
 import { HabitsModule } from './habits/habits.module';
 import { StepsModule } from './steps/steps.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { BadgesModule } from './badges/badges.module';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { PrismaModule } from './prisma/prisma.module';
     HabitsModule,
     StepsModule,
     PrismaModule,
-    UsersModule,
+    BadgesModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

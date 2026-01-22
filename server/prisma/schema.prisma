@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client" 
-  output = "../generated/prisma"
+  provider   = "prisma-client"
+  output     = "../generated/prisma"
   engineType = "binary"
 }
 
@@ -30,14 +30,16 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  xp        Int      @default(0)
+  xp Int @default(0)
 
-  streak    Int      @default(0)
-  bestStreak Int     @default(0)
-  
-  goals     Goal[]
-  habits    Habit[]
-  steps     Step[]
+  streak     Int @default(0)
+  bestStreak Int @default(0)
+
+  goals  Goal[]
+  habits Habit[]
+  steps  Step[]
+
+  userBadges UserBadge[] @relation("UserToUserBadge") // <-- ajouté
 
   @@map("users")
 }
@@ -55,97 +57,124 @@ model Goal {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  xpReward    Int      @default(100)
+  xpReward Int @default(100)
 
-  steps       Step[]
+  steps Step[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("goals")
   @@index([userId])
   @@index([status])
   @@index([priority])
+  @@map("goals")
 }
 
 model Habit {
-  id               String      @id @default(uuid())
+  id               String    @id @default(uuid())
   title            String
-  frequency        String      @default("DAILY")
+  frequency        String    @default("DAILY")
   category         String
   description      String?
-  isCompletedToday Boolean     @default(false)
-  currentStreak    Int         @default(0)
+  isCompletedToday Boolean   @default(false)
+  currentStreak    Int       @default(0)
   lastCompletedAt  DateTime?
   userId           String
-  
-  xpReward         Int         @default(20)
 
-  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  steps            HabitStep[]
-  habitLogs        HabitLog[]
+  xpReward Int @default(20)
 
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps     HabitStep[]
+  habitLogs HabitLog[]
 
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@map("habits")
   @@index([userId])
+  @@map("habits")
 }
 
 model HabitStep {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   title       String
-  isCompleted Boolean  @default(false)
+  isCompleted Boolean @default(false)
   habitId     String
-  order       Int      @default(0)
+  order       Int     @default(0)
 
-  habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  
-  habitLogs   HabitLog[] 
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  habitLogs HabitLog[]
 
-  @@map("habit_steps")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([habitId])
+  @@map("habit_steps")
 }
 
 model HabitLog {
-  id          String    @id @default(uuid())
-  date        DateTime  @default(now())
-  isCompleted Boolean   @default(false)
+  id          String   @id @default(uuid())
+  date        DateTime @default(now())
+  isCompleted Boolean  @default(false)
   habitId     String
-  
-  habitStepId String?   
+
+  habitStepId String?
   habitStep   HabitStep? @relation(fields: [habitStepId], references: [id])
 
-  habit       Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@map("habit_logs")
   @@index([habitId])
   @@index([date])
+  @@map("habit_logs")
 }
 
 model Step {
-  id           String      @id @default(uuid())
+  id           String   @id @default(uuid())
   title        String
   description  String?
   userId       String
-  is_completed Boolean     @default(false)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  is_completed Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  order       Int      @default(0) // Pour trier (1, 2, 3...)
+  order Int @default(0) // Pour trier (1, 2, 3...)
 
   // Relation One-to-Many
-  goalId      String
-  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goalId String
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("steps")
   @@index([userId])
+  @@map("steps")
+}
+
+model Badge {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  icon        String // URL ou nom de l'icône
+  condition   String // ex: "7_days_streak", "10_goals_completed"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id         String   @id @default(uuid())
+  userId     String
+  badgeId    String
+  unlockedAt DateTime @default(now())
+
+  user  User  @relation("UserToUserBadge", fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@map("user_badges")
 }
