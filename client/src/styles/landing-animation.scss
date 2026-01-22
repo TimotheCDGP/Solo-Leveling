@@ -1,0 +1,225 @@
+@import "https://unpkg.com/open-props" layer(design.system);
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200..900&family=Water+Brush&family=Oswald:wght@700;900&display=swap");
+
+:root {
+  --brand: #ecad29; 
+  --brand-2: #c58e1d;
+  --cyber: #00f2ff; 
+  --nav-bg: rgba(0, 0, 0, 0.6);
+}
+
+.landing-cyber {
+  background: #0a0a0a;
+  color: white !important; // Force le blanc pour tous les modes
+  min-height: 100vh;
+  position: relative;
+  font-family: "Inter", sans-serif;
+
+  .cyber-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+    backdrop-filter: blur(4px);
+
+    @media (min-width: 768px) {
+      padding: 1.5rem 5rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white !important;
+
+      & span {
+        font-family: "Oswald", sans-serif !important;
+        font-weight: 900 !important;
+        font-style: italic !important;
+        text-transform: uppercase !important;
+        font-size: 1.1rem;
+        letter-spacing: -0.02em;
+
+        @media (min-width: 768px) {
+          font-size: 1.4rem;
+        }
+      }
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      @media (min-width: 768px) {
+        gap: 2.5rem;
+      }
+
+      button {
+        color: white !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        background-color: transparent !important;
+        transform: scale(0.85);
+
+        @media (min-width: 768px) {
+          transform: scale(1);
+        }
+        
+        &:hover { background-color: rgba(255, 255, 255, 0.1) !important; }
+        svg { stroke: white !important; fill: none; }
+      }
+
+      .nav-item {
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+        color: white !important;
+        text-decoration: none;
+        font-family: "Inter", sans-serif !important;
+
+        @media (min-width: 768px) {
+          font-size: 0.85rem;
+          letter-spacing: 1px;
+        }
+
+        &.register-btn {
+          background: var(--brand) !important;
+          color: black !important;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          font-family: "Oswald", sans-serif !important;
+          font-weight: 900;
+          
+          @media (min-width: 768px) {
+            padding: 0.7rem 1.8rem;
+          }
+          &:hover { background: white !important; }
+        }
+      }
+    }
+  }
+
+  .hero {
+    block-size: 100dvh;
+    position: relative;
+
+    & figure {
+      block-size: 100dvh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    img {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      filter: brightness(0.7) contrast(1.1);
+    }
+  }
+
+  .controls {
+    position: absolute;
+    bottom: 10dvh;
+    left: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    z-index: 10;
+
+    @media (min-width: 768px) {
+      bottom: 12dvh;
+      left: 5rem;
+      right: auto;
+      max-width: 800px;
+    }
+
+    .glitch-container {
+      margin-bottom: 2rem;
+      @media (min-width: 768px) {
+        margin-bottom: 2.5rem;
+      }
+    }
+
+    & h1 {
+      // RÉINITIALISATION POUR CONTRER LE STYLE GLOBAL
+      font-family: "Water Brush", cursive !important;
+      font-weight: normal !important;
+      font-style: normal !important;
+      text-transform: none !important;
+      
+      color: var(--cyber);
+      font-size: clamp(3.5rem, 15vw, 6.5rem) !important; // Taille corrigée
+      text-shadow: 2px 2px 15px rgba(0, 242, 255, 0.4);
+      line-height: 0.8;
+      margin: 0;
+      padding-right: 0.15em; // Évite la coupe de la dernière lettre
+      animation: soft-glitch 5s ease-in-out infinite;
+
+      @media (min-width: 768px) {
+        font-size: clamp(5rem, 12vw, 10rem) !important;
+      }
+    }
+
+    .sub-text {
+      font-family: "Inter", sans-serif !important;
+      font-weight: 400 !important;
+      font-style: normal !important;
+      font-size: 0.9rem;
+      color: white !important;
+      letter-spacing: 1px;
+      text-transform: uppercase !important;
+      margin-top: 0.75rem;
+      opacity: 0.9;
+      max-width: 90%;
+
+      @media (min-width: 768px) {
+        font-size: 1.1rem;
+        letter-spacing: 2px;
+        margin-top: 0.5rem;
+      }
+    }
+
+    .btn-custom {
+      background: var(--brand);
+      border: none;
+      color: black !important;
+      font-family: "Oswald", sans-serif !important;
+      padding: 0.8rem 2rem;
+      font-weight: 900;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      @media (min-width: 768px) {
+        padding: 1rem 3rem;
+        font-size: 1rem;
+        letter-spacing: 2px;
+      }
+
+      &:hover {
+        background: white !important;
+        transform: translateX(10px);
+        box-shadow: 0 0 30px var(--brand);
+      }
+    }
+  }
+}
+
+@keyframes soft-glitch {
+    0%, 100% { transform: translate(0); opacity: 1; }
+    92% { transform: translate(0); }
+    94% { transform: translate(2px, -1px); opacity: 0.9; }
+    96% { transform: translate(-2px, 1px); }
+    98% { transform: translate(1px, -1px); }
+}

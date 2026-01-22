@@ -8,6 +8,7 @@ import {
   Settings,
   Trophy,
   Sparkles,
+  Zap,
 } from "lucide-react"
 
 import { NavMain } from "@/components/dashboard/nav-main"
@@ -62,10 +63,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Trophy className="size-4" />
+                  <Zap className="text-[--brand] fill-[--brand]/20 size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Hunter App</span>
+                  <span className="truncate font-semibold">Hunter Leveling</span>
                   <span className="truncate text-xs">Level Up Your Life</span>
                 </div>
               </a>

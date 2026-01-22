@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { 
   Trophy, Target, Zap, Calendar, Mail, Edit2, Save, 
-  ShieldCheck, TrendingUp, Lock, Camera, X, CheckCircle2 
+ TrendingUp, Lock, Camera, X, CheckCircle2 
 } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { format } from "date-fns"
@@ -107,7 +107,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
             
             <div className="pb-6 hidden sm:block">
               <Badge className="text-xl px-5 py-1.5 italic font-black uppercase tracking-tighter shadow-lg" style={{ backgroundColor: stats?.rankColor || '#6366f1' }}>
-                Rang {stats?.rank || 'E'}
+                RanK &nbsp;{stats?.rank || 'E'}
               </Badge>
             </div>
           </div>

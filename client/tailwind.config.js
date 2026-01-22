@@ -7,6 +7,10 @@ export default {
   ],
   theme: {
   	extend: {
+		fontFamily: {
+			oswald: ['Oswald', 'sans-serif'],
+			inter: ['Inter', 'sans-serif'],
+		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -62,7 +66,12 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+			hunter: {
+				gold: '#ecad29',
+				goldDark: '#c58e1d',
+				mana: '#00f2ff',
+			}
   		}
   	}
   },
