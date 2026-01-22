@@ -27,18 +27,6 @@ export function HabitList({ refreshTrigger = 0 }: HabitListProps) {
     }
   }, []);
 
-  /**
-   * MISE À JOUR CIBLÉE (Optimistic / Real-time sync)
-   * Cette fonction permet de mettre à jour une seule habitude dans la liste
-   * sans provoquer un rechargement complet, garantissant que le Modal 
-   * reçoit la nouvelle référence de l'objet immédiatement.
-   */
-  const handleUpdateHabit = useCallback((updatedHabit: Habit) => {
-    setHabits(prevHabits => 
-      prevHabits.map(h => h.id === updatedHabit.id ? updatedHabit : h)
-    );
-  }, []);
-
   useEffect(() => {
     fetchHabits();
   }, [refreshTrigger, fetchHabits]);
@@ -73,12 +61,9 @@ export function HabitList({ refreshTrigger = 0 }: HabitListProps) {
         <HabitCard 
           key={habit.id} 
           habit={habit} 
-          // On passe handleUpdateHabit pour une sync immédiate
           onRefresh={() => {
-            fetchHabits(); // Garde le fetch pour la cohérence serveur
+            fetchHabits();
           }}
-          // Si ton HabitCard supporte une prop de mise à jour directe :
-          // onUpdate={handleUpdateHabit} 
         />
       ))}
     </div>
