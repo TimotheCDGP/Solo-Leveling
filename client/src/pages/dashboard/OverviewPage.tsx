@@ -19,7 +19,7 @@ export default function OverviewPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-foreground animate-in fade-in duration-500">
+    <div className="min-h-screen bg-background text-foreground animate-in fade-in duration-500">
       <div className="flex flex-col gap-6 p-4 md:p-8 lg:px-12">
         <div className="flex flex-col gap-1">
           <h2 className="text-3xl font-bold tracking-tight">Tableau de Bord</h2>
@@ -35,17 +35,17 @@ export default function OverviewPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-card rounded-xl border border-border/80 shadow-sm overflow-hidden bg-white">
+          <div className="rounded-xl border border-border shadow-sm overflow-hidden bg-card">
              <ChartRadialProgression xp={stats?.xp ?? 0} rank={stats?.rank ?? "Rang E"} />
           </div>
-          <div className="bg-card rounded-xl border border-border/80 shadow-sm overflow-hidden bg-white">
+          <div className="rounded-xl border border-border shadow-sm overflow-hidden bg-card">
              <ChartPieInteractive data={stats?.categoryData ?? []} />
           </div>
           
-          <div className="bg-card rounded-xl border border-border/80 shadow-sm overflow-hidden bg-white">
+          <div className="rounded-xl border border-border shadow-sm overflow-hidden bg-card">
             <ChartBarInteractive data={stats?.priorityData ?? []} />
           </div>
-          <div className="bg-card rounded-xl border border-border/80 shadow-sm overflow-hidden bg-white">
+          <div className="rounded-xl border border-border shadow-sm overflow-hidden bg-card">
             <ChartLineInteractive data={stats?.weeklyActivity ?? []} />
           </div>
         </div>

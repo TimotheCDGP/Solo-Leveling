@@ -10,7 +10,6 @@ import HabitsPage from "./pages/dashboard/HabitsPage";
 import GoalsPage from "./pages/dashboard/GoalsPage";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import OverviewPage from "./pages/dashboard/OverviewPage";
-import ProfilePage from "./pages/dashboard/ProfilePage";
 
 function App() {
   return (
@@ -36,7 +35,6 @@ function App() {
               <Route path="overview" element={<OverviewPage />} />
               <Route path="goals" element={<GoalsPage />} />
               <Route path="habits" element={<HabitsPage />} />
-              <Route path="profile" element={<ProfilePage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
