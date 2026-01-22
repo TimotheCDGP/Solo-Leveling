@@ -20,7 +20,7 @@ export function ChartRadialProgression({ xp, rank }: ChartRadialProps) {
     <Card className="flex flex-col border-none shadow-none bg-background/50">
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-sm font-medium uppercase tracking-wider">Progression</CardTitle>
-        <CardDescription>{rank}</CardDescription>
+        <CardDescription>Rang {rank}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">

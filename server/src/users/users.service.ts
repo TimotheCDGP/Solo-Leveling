@@ -3,45 +3,68 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { subDays, startOfDay, endOfDay, format, isToday, isYesterday } from 'date-fns';
 import { GoalStatus } from 'generated/prisma/enums';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async updateProfile(userId: string, dto: UpdateUserDto) {
+    const dataToUpdate: any = { ...dto };
+
+    if (dto.password) {
+      const salt = await bcrypt.genSalt();
+      dataToUpdate.password = await bcrypt.hash(dto.password, salt);
+    }
+
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { ...dto },
+      data: dataToUpdate,
     });
+
     const { password, ...result } = user;
     return result;
+  }
+
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        xp: true,
+        streak: true,
+        bestStreak: true,
+      },
+    });
+    
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+    return user;
   }
 
   async getProfileStats(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        goals: true,
-        habits: true,
-        steps: true,
+        _count: {
+          select: {
+            goals: true,
+          }
+        },
+        goals: {
+          where: { status: GoalStatus.DONE }
+        }
       },
     });
 
     if (!user) throw new NotFoundException('User not found');
 
-    const totalGoals = user.goals.length;
-    const completedGoals = user.goals.filter(g => g.status === GoalStatus.DONE).length;
+    const totalGoals = user._count.goals;
+    const completedGoals = user.goals.length;
 
-    // Calcul de l'XP totale : 10 XP par objectif complété + 1 XP par habit complété
-    const totalXP = completedGoals * 10 + user.habits.filter(h => h.isCompletedToday).length;
-
-    // Calcul du Rang : E → S
-    let rank: 'E' | 'D' | 'C' | 'B' | 'A' | 'S' = 'E';
-    if (totalXP >= 100) rank = 'S';
-    else if (totalXP >= 75) rank = 'A';
-    else if (totalXP >= 50) rank = 'B';
-    else if (totalXP >= 30) rank = 'C';
-    else if (totalXP >= 15) rank = 'D';
+    const rankInfo = this.calculateRank(user.xp);
 
     return {
       id: user.id,
@@ -51,13 +74,13 @@ export class UsersService {
       createdAt: user.createdAt,
       totalGoals,
       completedGoals,
-      totalXP,
-      rank,
+      totalXP: user.xp,
+      rank: rankInfo.name,
+      rankColor: rankInfo.color,
     };
   }
 
   async getDashboardStats(userId: string) {
-    // 1. Récupération des compteurs globaux et des infos utilisateur
     const [activeGoals, completedGoals, totalHabits, user, categories, priorities] = await Promise.all([
       this.prisma.goal.count({ where: { userId, NOT: { status: GoalStatus.DONE } } }),
       this.prisma.goal.count({ where: { userId, status: GoalStatus.DONE } }),
@@ -149,9 +172,11 @@ export class UsersService {
   }
 
   private calculateRank(xp: number) {
-    if (xp < 500) return { name: 'Rang E', color: '#94a3b8' };
-    if (xp < 1500) return { name: 'Rang D', color: '#22c55e' };
-    if (xp < 3000) return { name: 'Rang C', color: '#3b82f6' };
-    return { name: 'Rang S', color: '#ef4444' };
+    if (xp < 500) return { name: 'E', color: '#94a3b8' };
+    if (xp < 1500) return { name: 'D', color: '#22c55e' };
+    if (xp < 3000) return { name: 'C', color: '#3b82f6' };
+    if (xp < 5000) return { name: 'B', color: '#3b82f6' };
+    if (xp < 7500) return { name: 'A', color: '#a855f7' };
+    return { name: 'S', color: '#ef4444' };
   }
 }

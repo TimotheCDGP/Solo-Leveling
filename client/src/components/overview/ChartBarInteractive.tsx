@@ -22,9 +22,9 @@ export function ChartBarInteractive({ data }: { data: { name: string, value: num
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar 
               dataKey="value" 
-              fill="hsl(var(--chart-3))" 
+              fill="hsl(var(--chart-2))" 
               radius={[4, 4, 0, 0]} 
-              barSize={40}
+              barSize={1000 / data.length}
             />
           </BarChart>
         </ChartContainer>

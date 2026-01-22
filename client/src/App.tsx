@@ -17,6 +17,7 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Routes Publiques */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -29,9 +30,8 @@ function App() {
                 </RequireAuth>
               } 
             >
-              <Route index element={<Navigate to="/dashboard/Overview" replace />} />
+              <Route index element={<Navigate to="/dashboard/overview" replace />} />
               
-              {/* Sous-routes */}
               <Route path="overview" element={<OverviewPage />} />
               <Route path="goals" element={<GoalsPage />} />
               <Route path="habits" element={<HabitsPage />} />
@@ -41,7 +41,7 @@ function App() {
           </Routes>
         </AuthProvider>
       </BrowserRouter>
-      <Toaster />
+      <Toaster position="top-right" richColors />
     </ThemeProvider>
   );
 }
