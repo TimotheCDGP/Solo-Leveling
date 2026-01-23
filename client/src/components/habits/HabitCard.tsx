@@ -59,7 +59,6 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
     const wasCompleted = habit.isCompletedToday;
 
     setIsLoading(true);
-    // UI Optimiste
     setHabit((prev) => ({
       ...prev,
       isCompletedToday: !wasCompleted,
@@ -68,9 +67,8 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
 
     try {
       await HabitService.toggleHabit(habit.id);
-      if (!wasCompleted) {
-        toast.success(`Habitude validée ! (+${habit.xpReward} XP) 🔥`);
-      }
+      onRefresh();
+      if (!wasCompleted) toast.success(`Habitude validée ! (+${habit.xpReward} XP) 🔥`);
     } catch (err) {
       console.error(err);
       setHabit(initialHabit);
@@ -83,7 +81,6 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
   const handleToggleStep = async (stepId: string) => {
     const currentSteps = habit.steps ?? [];
     const newSteps = currentSteps.map((s) => (s.id === stepId ? { ...s, isCompleted: !s.isCompleted } : s));
-    
     const newCompletedCount = newSteps.filter((s) => s.isCompleted).length;
     const isNowFullyDone = newCompletedCount === newSteps.length;
     const wasFullyDone = habit.isCompletedToday;
@@ -101,12 +98,10 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
 
     try {
       const res = await HabitService.toggleStep(stepId);
-      
       if (res.isCompletedToday && !wasFullyDone) {
         toast.success(`Routine complétée ! (+${habit.xpReward} XP) 🔥`);
         onRefresh();
-      } 
-      else if (!res.isCompletedToday && wasFullyDone) {
+      } else if (!res.isCompletedToday && wasFullyDone) {
         onRefresh();
       }
     } catch (err) {
@@ -127,15 +122,11 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
       >
         <div className="flex items-center justify-between p-4 pb-2">
             <Badge variant="outline" className={cn("gap-1.5 font-medium border", getCategoryColor(habit.category))}>
-                {getCategoryIcon(habit.category)}
-                {habit.category}
+                {getCategoryIcon(habit.category)} {habit.category}
             </Badge>
-
             <div className={cn(
                 "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-colors border",
-                habit.currentStreak > 0 
-                  ? "bg-orange-100 text-orange-600 border-orange-200" 
-                  : "bg-muted text-muted-foreground border-transparent"
+                habit.currentStreak > 0 ? "bg-orange-100 text-orange-600 border-orange-200" : "bg-muted text-muted-foreground border-transparent"
             )}>
                 <Flame className={cn("h-3.5 w-3.5", habit.currentStreak > 0 && "fill-orange-500 text-orange-500")} />
                 <span>{habit.currentStreak} <span className="hidden sm:inline">Jours</span></span>
@@ -146,55 +137,35 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
             <h4 className={cn("font-bold text-lg leading-tight", habit.isCompletedToday && "text-muted-foreground line-through decoration-2 decoration-green-500/50")}>
                 {habit.title}
             </h4>
-            {habit.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                    {habit.description}
-                </p>
-            )}
+            {habit.description && <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{habit.description}</p>}
         </div>
 
-        <div className="mt-auto border-t bg-muted/20 p-3">
+        <div className="mt-auto border-t bg-muted/20 p-3 text-sm font-bold">
             <div className="flex items-center justify-between gap-3">
-                <div 
-                    className="flex items-center gap-3 cursor-pointer group/checkbox"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isRoutine) handleToggleHabit();
-                        else setIsOpen(!isOpen);
-                    }}
-                >
+                <div className="flex items-center gap-3 cursor-pointer group/checkbox" onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isRoutine) handleToggleHabit();
+                    else setIsOpen(!isOpen);
+                }}>
                     <div className="relative shrink-0">
                          {isRoutine ? (
                             <div className="relative flex h-9 w-9 items-center justify-center bg-background rounded-full border shadow-sm group-hover/checkbox:scale-105 transition-transform">
                                <div className="absolute inset-0 rounded-full border-2 border-muted" />
-                               <div 
-                                 className={cn("absolute inset-0 rounded-full border-2 transition-all duration-500", 
+                               <div className={cn("absolute inset-0 rounded-full border-2 transition-all duration-500", 
                                    habit.isCompletedToday ? "border-green-500" : "border-primary"
-                                 )}
-                                 style={{ clipPath: `inset(${100 - progress}% 0 0 0)` }} 
-                               />
-                               {habit.isCompletedToday ? 
-                                 <Check className="h-5 w-5 text-green-600 animate-in zoom-in" /> :
-                                 <span className="text-[10px] font-bold text-primary">{Math.round(progress)}%</span>
-                               }
+                                 )} style={{ clipPath: `inset(${100 - progress}% 0 0 0)` }} />
+                               {habit.isCompletedToday ? <Check className="h-5 w-5 text-green-600 animate-in zoom-in" /> : <span className="text-[10px] font-bold text-primary">{Math.round(progress)}%</span>}
                             </div>
                         ) : (
-                            <div className={cn(
-                                "h-9 w-9 rounded-full border-2 flex items-center justify-center shadow-sm transition-all duration-300 group-hover/checkbox:scale-105",
-                                habit.isCompletedToday 
-                                    ? "bg-green-500 border-green-500 text-white" 
-                                    : "bg-background border-muted-foreground/30 hover:border-primary"
+                            <div className={cn("h-9 w-9 rounded-full border-2 flex items-center justify-center shadow-sm transition-all duration-300 group-hover/checkbox:scale-105",
+                                habit.isCompletedToday ? "bg-green-500 border-green-500 text-white" : "bg-background border-muted-foreground/30 hover:border-primary"
                             )}>
                                 {habit.isCompletedToday && <Check className="h-5 w-5 animate-in zoom-in" />}
                             </div>
                         )}
                     </div>
-
                     <div className="flex flex-col">
-                        <span className={cn(
-                            "text-sm font-bold transition-colors",
-                            habit.isCompletedToday ? "text-green-600" : "text-foreground group-hover/checkbox:text-primary"
-                        )}>
+                        <span className={cn("text-sm font-bold transition-colors", habit.isCompletedToday ? "text-green-600" : "text-foreground group-hover/checkbox:text-primary")}>
                             {habit.isCompletedToday ? "Mission accomplie" : (isRoutine ? "Continuer la routine" : "Passer à l'action")}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
@@ -202,49 +173,25 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
                         </span>
                     </div>
                 </div>
-
                 {isRoutine && (
-                     <Button 
-                        variant="ghost" size="sm" 
-                        className="h-8 w-8 p-0 rounded-full"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsOpen(!isOpen);
-                        }}
-                     >
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full" onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}>
                         {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                     </Button>
+                    </Button>
                 )}
             </div>
         </div>
 
         {isRoutine && (
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-              <CollapsibleContent className="animate-collapsible-down overflow-hidden bg-muted/30 border-t">
-                  <div className="p-2 space-y-1">
-                      {habit.steps.map((step) => (
-                          <div 
-                              key={step.id} 
-                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-background transition-colors cursor-pointer group/step"
-                              onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleStep(step.id);
-                              }}
-                          >
-                              <Checkbox 
-                                  id={step.id}
-                                  checked={step.isCompleted} 
-                                  className="h-5 w-5 rounded-full border-2 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
-                              />
-                              <label htmlFor={step.id} className={cn(
-                                  "text-sm flex-1 cursor-pointer select-none transition-all",
-                                  step.isCompleted ? "text-muted-foreground line-through" : "text-foreground"
-                              )}>
-                                  {step.title}
-                              </label>
-                          </div>
-                      ))}
-                  </div>
+              <CollapsibleContent className="animate-collapsible-down overflow-hidden bg-muted/30 border-t p-2 space-y-1">
+                  {habit.steps.map((step) => (
+                      <div key={step.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-background transition-colors cursor-pointer group/step" onClick={(e) => { e.stopPropagation(); handleToggleStep(step.id); }}>
+                          <Checkbox id={step.id} checked={step.isCompleted} className="h-5 w-5 rounded-full border-2 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
+                          <label htmlFor={step.id} className={cn("text-sm flex-1 cursor-pointer select-none transition-all", step.isCompleted ? "text-muted-foreground line-through" : "text-foreground")}>
+                              {step.title}
+                          </label>
+                      </div>
+                  ))}
               </CollapsibleContent>
           </Collapsible>
         )}
@@ -255,9 +202,7 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
         isOpen={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
         onUpdate={(updatedHabit) => {
-            if (updatedHabit) {
-                setHabit(updatedHabit);
-            }
+            if (updatedHabit) setHabit(updatedHabit);
             onRefresh();
         }}
       />
