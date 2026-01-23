@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { 
   Trophy, Target, Zap, Calendar, Mail, Edit2, Save, 
-  TrendingUp, Camera, X, Award, Lock, CheckCircle2 
+  TrendingUp, Camera, X, Award, Lock, CheckCircle2, ChevronLeft 
 } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -77,8 +77,18 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
         side="right" 
         className="p-0 w-full sm:max-w-[50vw] h-full flex flex-col border-l border-border/60 bg-background"
       >
-        {/* HEADER / COVER IMAGE */}
         <div className="relative h-48 sm:h-64 w-full bg-slate-900 shrink-0">
+          <div className="absolute top-4 left-4 z-50">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => onOpenChange(false)}
+              className="bg-black/20 hover:bg-black/40 text-white backdrop-blur-md border border-white/10 font-oswald uppercase italic font-bold tracking-widest text-[10px] gap-1 px-3"
+            >
+              <ChevronLeft className="h-4 w-4" /> Fermer
+            </Button>
+          </div>
+
           <div 
             className="absolute inset-0 opacity-80 bg-cover bg-center bg-no-repeat transition-all duration-500"
             style={{ 
@@ -108,11 +118,9 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
           </div>
         </div>
 
-        {/* CONTENT AREA */}
         <ScrollArea className="flex-1 mt-16">
           <div className="px-10 space-y-8 pb-12">
             
-            {/* NAME & INFO SECTION */}
             <div className="flex flex-col gap-6 pt-6">
               <div className="flex justify-between items-start">
                 <div className="space-y-1 w-full max-w-md">
@@ -128,7 +136,6 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
                         <Input value={editData.avatar} onChange={(e) => setEditData({...editData, avatar: e.target.value})} className="text-xs font-mono bg-muted border-border" placeholder="https://..." />
                       </div>
 
-                      {/* PASSWORD FIELDS RETABLISHED */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-[10px] font-bold uppercase text-muted-foreground">Nouveau Mot de Passe</label>
