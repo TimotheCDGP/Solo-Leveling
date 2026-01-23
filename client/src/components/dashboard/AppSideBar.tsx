@@ -5,8 +5,8 @@ import {
   LayoutDashboard,
   Target,
   Flame,
-  Settings,
-  Sparkles,
+  // Settings,
+  // Sparkles,
   Zap,
 } from "lucide-react"
 
@@ -41,24 +41,24 @@ const data = {
       url: "/dashboard/habits",
       icon: Flame,
     },
-    {
-      title: "Boutique (Bientôt)",
-      url: "#",
-      icon: Sparkles,
-    },
-    {
-      title: "Paramètres",
-      url: "#",
-      icon: Settings,
-    },
+    // {
+    //   title: "Boutique (Bientôt)",
+    //   url: "#",
+    //   icon: Sparkles,
+    // },
+    // {
+    //   title: "Paramètres",
+    //   url: "#",
+    //   icon: Settings,
+    // },
   ],
 }
 
 export function AppSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar 
-      collapsible="icon" 
-      className={cn("bg-background border-r border-border/50", className)} 
+    <Sidebar
+      collapsible="icon"
+      className={cn("bg-background border-r border-border/50", className)}
       {...props}
     >
       <SidebarHeader>
@@ -71,7 +71,6 @@ export function AppSidebar({ className, ...props }: React.ComponentProps<typeof 
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight italic font-oswald uppercase">
                   <span className="truncate font-black tracking-tighter text-lg">Hunter Leveling</span>
-                  <span className="truncate text-[10px] font-bold opacity-70">System UI v1.0</span>
                 </div>
               </a>
             </SidebarMenuButton>
