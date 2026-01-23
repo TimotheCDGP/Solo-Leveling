@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GalleryVerticalEnd, Loader2 } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -33,9 +33,9 @@ export default function Register() {
         <div className="flex justify-center gap-2 md:justify-start">
           <Link to="/" className="flex items-center gap-2 font-medium">
             <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-4" />
+              <Zap className="text-[--brand] fill-[--brand]/20 size-7 bg-white" />
             </div>
-            Hunter App
+            Hunter Leveling
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">

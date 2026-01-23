@@ -7,7 +7,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async updateProfile(userId: string, dto: UpdateUserDto) {
     const dataToUpdate: any = { ...dto };
@@ -39,7 +39,7 @@ export class UsersService {
         bestStreak: true,
       },
     });
-    
+
     if (!user) throw new NotFoundException('Utilisateur introuvable');
     return user;
   }
@@ -85,9 +85,9 @@ export class UsersService {
       this.prisma.goal.count({ where: { userId, NOT: { status: GoalStatus.DONE } } }),
       this.prisma.goal.count({ where: { userId, status: GoalStatus.DONE } }),
       this.prisma.habit.count({ where: { userId } }),
-      this.prisma.user.findUnique({ 
-        where: { id: userId }, 
-        select: { xp: true, streak: true, bestStreak: true, updatedAt: true } 
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { xp: true, streak: true, bestStreak: true, updatedAt: true }
       }),
       this.prisma.goal.groupBy({ by: ['category'], where: { userId }, _count: true }),
       this.prisma.goal.groupBy({ by: ['priority'], where: { userId }, _count: true }),
@@ -139,9 +139,8 @@ export class UsersService {
     };
   }
 
-  /**
-   * Met à jour la série actuelle et le record personnel (bestStreak)
-   */
+  // Met à jour la série actuelle et le record personnel (bestStreak)
+
   async updateStreak(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -164,7 +163,7 @@ export class UsersService {
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         streak: newStreak,
         bestStreak: newBestStreak,
       },
@@ -178,5 +177,50 @@ export class UsersService {
     if (xp < 5000) return { name: 'B', color: '#3b82f6' };
     if (xp < 7500) return { name: 'A', color: '#a855f7' };
     return { name: 'S', color: '#ef4444' };
+  }
+
+  async exportUserData(userId: string) {
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        goals: true,
+        habits: {
+          include: {
+            steps: true,
+            habitLogs: true,
+          },
+        },
+        steps: true,
+        userBadges: {
+          include: { badge: true },
+        },
+      },
+    });
+
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        xp: user.xp,
+        streak: user.streak,
+        bestStreak: user.bestStreak,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      goals: user.goals,
+      habits: user.habits,
+      steps: user.steps,
+      badges: user.userBadges.map(ub => ({
+        id: ub.badge.id,
+        name: ub.badge.name,
+        description: ub.badge.description,
+        unlockedAt: ub.unlockedAt,
+      })),
+    };
   }
 }

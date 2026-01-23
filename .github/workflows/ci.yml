@@ -19,6 +19,29 @@ jobs:
         uses: actions/checkout@v4
         # Récupère le code de la PR/branche
 
+      - name: Create server .env for CI
+        # Create a minimal server/.env so docker-compose's env_file won't fail on the runner.
+        # Prefer GitHub Secrets when provided, otherwise fall back to the compose defaults.
+        run: |
+          mkdir -p server
+          DB="${{ secrets.CI_DATABASE_URL }}"
+          JWT="${{ secrets.CI_JWT_SECRET }}"
+          NODE_ENV_VAL="${{ secrets.CI_NODE_ENV }}"
+          if [ -z "$DB" ]; then
+            DB="postgres://solodev:solopassword123@postgres:5432/solo_leveling"
+          fi
+          if [ -z "$JWT" ]; then
+            JWT="ci-test-secret"
+          fi
+          if [ -z "$NODE_ENV_VAL" ]; then
+            NODE_ENV_VAL="test"
+          fi
+          cat > server/.env <<EOF
+          DATABASE_URL="$DB"
+          NODE_ENV=$NODE_ENV_VAL
+          JWT_SECRET=$JWT
+          EOF
+
       - name: Check docker compose available
         run: |
           # Vérifie que 'docker compose' est disponible sur le runner
@@ -47,7 +70,7 @@ jobs:
       - name: Run migrations (in temporary server container)
         run: |
           # Use a temporary container to install deps, generate prisma client and apply migrations
-          docker compose run --rm server sh -c "npm ci && npx prisma generate && npx prisma migrate deploy"
+          docker compose run --rm server sh -c 'if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi && npx prisma generate && npx prisma migrate deploy'
 
       - name: Start server and client
         run: |
@@ -76,12 +99,18 @@ jobs:
       - name: Run server tests (in ephemeral container)
         run: |
           # Run tests in a temporary container; install dev deps there so tests can run
-          docker compose run --rm server sh -c "npm ci && npm test"
+          docker compose run --rm server sh -c 'if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi && npm test'
 
-      - name: Build client (in ephemeral container)
+      - name: Build client (on runner)
         run: |
-          # Build frontend artifacts inside a temporary client container
-          docker compose run --rm client sh -c "npm ci && npm run build"
+          # Build frontend artifacts on the runner (uses checked-out source)
+          cd client
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
+          npm run build
 
       - name: Collect logs on failure
         if: failure()

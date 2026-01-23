@@ -4,10 +4,10 @@ import * as React from "react"
 import {
   LayoutDashboard,
   Target,
-  Flame, // 👈 Changement ici (plus logique pour les habitudes)
-  Settings,
-  Trophy,
-  Sparkles,
+  Flame,
+  // Settings,
+  // Sparkles,
+  Zap,
 } from "lucide-react"
 
 import { NavMain } from "@/components/dashboard/nav-main"
@@ -22,6 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
 const data = {
   navMain: [
@@ -40,33 +41,36 @@ const data = {
       url: "/dashboard/habits",
       icon: Flame,
     },
-    {
-      title: "Boutique (Bientôt)",
-      url: "#",
-      icon: Sparkles,
-    },
-    {
-      title: "Paramètres",
-      url: "#",
-      icon: Settings,
-    },
+    // {
+    //   title: "Boutique (Bientôt)",
+    //   url: "#",
+    //   icon: Sparkles,
+    // },
+    // {
+    //   title: "Paramètres",
+    //   url: "#",
+    //   icon: Settings,
+    // },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar
+      collapsible="icon"
+      className={cn("bg-background border-r border-border/50", className)}
+      {...props}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Trophy className="size-4" />
+                  <Zap className="text-[--brand] fill-[--brand]/20 size-4" />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Hunter App</span>
-                  <span className="truncate text-xs">Level Up Your Life</span>
+                <div className="grid flex-1 text-left text-sm leading-tight italic font-oswald uppercase">
+                  <span className="truncate font-black tracking-tighter text-lg">Hunter Leveling</span>
                 </div>
               </a>
             </SidebarMenuButton>

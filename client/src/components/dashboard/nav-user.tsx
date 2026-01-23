@@ -2,13 +2,13 @@ import {
   ChevronsUpDown,
   LogOut,
   BadgeCheck,
-  CreditCard,
-  Bell,
+  // Bell,
 } from "lucide-react"
 
 import {
   Avatar,
   AvatarFallback,
+  AvatarImage,
 } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -90,10 +90,10 @@ export function NavUser() {
                   Mon profil
                 </DropdownMenuItem>
               </DropdownMenuItem>
-              <DropdownMenuItem disabled className="opacity-50">
+              {/* <DropdownMenuItem disabled className="opacity-50">
                 <Bell className="mr-2 h-4 w-4" />
                 <span>Notifications</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
