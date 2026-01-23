@@ -4,6 +4,7 @@ import type { Badge } from "./badges.service";
 
 // Type pour la réponse enrichie du backend lors d'une validation
 export interface HabitActionResponse {
+  isCompletedToday: boolean;
   habit: Habit;
   newBadges: Badge[];
 }

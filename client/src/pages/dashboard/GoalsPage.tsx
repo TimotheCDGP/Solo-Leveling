@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { GoalList } from "@/components/goals/GoalList";
 import { ResponsiveGoalDialog } from "@/components/goals/ResponsiveGoalDialog";
 import { GoalService } from "@/services/goal.service";
-import { Target, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Target } from "lucide-react";
 import type { Goal } from "@/types/goal";
 
 export default function GoalsPage() {
