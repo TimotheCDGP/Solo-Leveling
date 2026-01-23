@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react";
 import { 
   Flame, ChevronDown, ChevronUp, Check, 
@@ -26,12 +28,10 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  // guard against undefined steps coming from API/client
   const steps = habit.steps ?? [];
   const isRoutine = steps.length > 0;
   const totalSteps = steps.length;
   const completedSteps = steps.filter(s => s.isCompleted).length;
-  // avoid division by zero with a safe fallback
   const progress = isRoutine ? (completedSteps / (totalSteps || 1)) * 100 : (habit.isCompletedToday ? 100 : 0);
 
   const getCategoryIcon = (cat: string) => {
@@ -56,44 +56,43 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
 
   const handleToggleHabit = async () => {
     if (isLoading) return;
-    const oldState = habit.isCompletedToday;
+    const wasCompleted = habit.isCompletedToday;
 
     setIsLoading(true);
+    // UI Optimiste
     setHabit((prev) => ({
       ...prev,
-      isCompletedToday: !prev.isCompletedToday,
-      currentStreak: !prev.isCompletedToday ? prev.currentStreak + 1 : Math.max(0, prev.currentStreak - 1),
+      isCompletedToday: !wasCompleted,
+      currentStreak: !wasCompleted ? prev.currentStreak + 1 : Math.max(0, prev.currentStreak - 1),
     }));
 
     try {
       await HabitService.toggleHabit(habit.id);
-      onRefresh();
-      if (!oldState) toast.success(`Habitude validée ! (+${habit.xpReward} XP) 🔥`);
+      if (!wasCompleted) {
+        toast.success(`Habitude validée ! (+${habit.xpReward} XP) 🔥`);
+      }
     } catch (err) {
-      // log to help debugging while avoiding unused variable lint errors
-  console.error(err);
+      console.error(err);
       setHabit(initialHabit);
-      toast.error("Erreur connexion");
+      toast.error("Erreur de synchronisation");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleToggleStep = async (stepId: string) => {
-    // use the current steps from habit (guarded) to avoid undefined issues
     const currentSteps = habit.steps ?? [];
     const newSteps = currentSteps.map((s) => (s.id === stepId ? { ...s, isCompleted: !s.isCompleted } : s));
+    
     const newCompletedCount = newSteps.filter((s) => s.isCompleted).length;
-    const totalStepsLocal = newSteps.length;
-    const isNowFullyDone = newCompletedCount === totalStepsLocal;
+    const isNowFullyDone = newCompletedCount === newSteps.length;
     const wasFullyDone = habit.isCompletedToday;
 
     setHabit((prev) => ({
       ...prev,
       steps: newSteps,
       isCompletedToday: isNowFullyDone,
-      currentStreak:
-        isNowFullyDone && !wasFullyDone
+      currentStreak: isNowFullyDone && !wasFullyDone
           ? prev.currentStreak + 1
           : !isNowFullyDone && wasFullyDone
           ? Math.max(0, prev.currentStreak - 1)
@@ -102,17 +101,18 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
 
     try {
       const res = await HabitService.toggleStep(stepId);
-      // backend now returns the full Habit. Use isCompletedToday to detect
-      // whether the parent habit became fully completed or was uncompleted.
+      
       if (res.isCompletedToday && !wasFullyDone) {
         toast.success(`Routine complétée ! (+${habit.xpReward} XP) 🔥`);
         onRefresh();
-      } else if (!res.isCompletedToday && wasFullyDone) {
+      } 
+      else if (!res.isCompletedToday && wasFullyDone) {
         onRefresh();
       }
     } catch (err) {
-  console.error(err);
+      console.error(err);
       setHabit(initialHabit);
+      toast.error("Erreur de synchronisation");
     }
   };
 
@@ -125,7 +125,6 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
         )}
         onClick={() => setIsDetailsOpen(true)}
       >
-        
         <div className="flex items-center justify-between p-4 pb-2">
             <Badge variant="outline" className={cn("gap-1.5 font-medium border", getCategoryColor(habit.category))}>
                 {getCategoryIcon(habit.category)}
@@ -156,7 +155,6 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
 
         <div className="mt-auto border-t bg-muted/20 p-3">
             <div className="flex items-center justify-between gap-3">
-                
                 <div 
                     className="flex items-center gap-3 cursor-pointer group/checkbox"
                     onClick={(e) => {
@@ -171,7 +169,7 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
                                <div className="absolute inset-0 rounded-full border-2 border-muted" />
                                <div 
                                  className={cn("absolute inset-0 rounded-full border-2 transition-all duration-500", 
-                                    habit.isCompletedToday ? "border-green-500" : "border-primary"
+                                   habit.isCompletedToday ? "border-green-500" : "border-primary"
                                  )}
                                  style={{ clipPath: `inset(${100 - progress}% 0 0 0)` }} 
                                />
@@ -197,7 +195,7 @@ export function HabitCard({ habit: initialHabit, onRefresh }: HabitCardProps) {
                             "text-sm font-bold transition-colors",
                             habit.isCompletedToday ? "text-green-600" : "text-foreground group-hover/checkbox:text-primary"
                         )}>
-                            {habit.isCompletedToday ? "Mission accomplie pour aujourd'hui" : (isRoutine ? "Continuer la routine" : "Passer à l'action")}
+                            {habit.isCompletedToday ? "Mission accomplie" : (isRoutine ? "Continuer la routine" : "Passer à l'action")}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
                             {habit.isCompletedToday ? "Bien joué !" : `Gain: +${habit.xpReward} XP`}
