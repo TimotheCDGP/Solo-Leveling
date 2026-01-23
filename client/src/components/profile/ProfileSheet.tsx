@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { 
   Trophy, Target, Zap, Calendar, Mail, Edit2, Save, 
-  TrendingUp, Camera, X, Award 
+  TrendingUp, Camera, X, Award, Lock, CheckCircle2 
 } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -51,7 +51,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
   }, [open, user])
 
   const handleUpdate = async () => {
-    if (editData.password !== editData.confirmPassword) {
+    if (editData.password && editData.password !== editData.confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas !")
       return
     }
@@ -122,12 +122,32 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
                         <label className="text-[10px] font-bold uppercase text-muted-foreground">Nom du Hunter</label>
                         <Input value={editData.name} onChange={(e) => setEditData({...editData, name: e.target.value})} className="text-xl font-black italic uppercase bg-muted border-border" />
                       </div>
+                      
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold uppercase text-muted-foreground">URL de l'Avatar</label>
                         <Input value={editData.avatar} onChange={(e) => setEditData({...editData, avatar: e.target.value})} className="text-xs font-mono bg-muted border-border" placeholder="https://..." />
                       </div>
+
+                      {/* PASSWORD FIELDS RETABLISHED */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase text-muted-foreground">Nouveau Mot de Passe</label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input type="password" value={editData.password} onChange={(e) => setEditData({...editData, password: e.target.value})} className="pl-10 bg-muted border-border" placeholder="••••••••" />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase text-muted-foreground">Confirmer</label>
+                          <div className="relative">
+                            <CheckCircle2 className={`absolute left-3 top-2.5 h-4 w-4 ${editData.password && editData.password === editData.confirmPassword ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                            <Input type="password" value={editData.confirmPassword} onChange={(e) => setEditData({...editData, confirmPassword: e.target.value})} className="pl-10 bg-muted border-border" placeholder="••••••••" />
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="flex gap-2 pt-2">
-                        <Button onClick={handleUpdate} className="bg-primary text-primary-foreground flex-1 gap-2 font-bold uppercase text-xs h-10">
+                        <Button onClick={handleUpdate} className="bg-primary text-primary-foreground flex-1 gap-2 font-bold uppercase text-xs h-10 tracking-widest">
                           <Save className="h-4 w-4" /> Sauvegarder
                         </Button>
                         <Button onClick={() => setIsEditing(false)} variant="outline" className="h-10 px-4">
@@ -160,7 +180,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
 
             <Separator className="bg-border/60" />
 
-            {/* TABS SECTION: STATS & BADGES */}
+            {/* TABS SECTION */}
             <Tabs defaultValue="stats" className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 mb-8">
                 <TabsTrigger value="stats" className="font-black uppercase italic tracking-tighter gap-2 text-xs">
