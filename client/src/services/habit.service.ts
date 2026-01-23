@@ -1,5 +1,12 @@
 import { api } from "./api";
 import type { Habit, CreateHabitPayload } from "@/types/habit";
+import type { Badge } from "./badges.service";
+
+// Type pour la réponse enrichie du backend lors d'une validation
+export interface HabitActionResponse {
+  habit: Habit;
+  newBadges: Badge[];
+}
 
 export const HabitService = {
   findAll: async (): Promise<Habit[]> => {
@@ -12,15 +19,21 @@ export const HabitService = {
     return res.data;
   },
 
-  // Toggle pour une habitude (Renvoie l'habit complet pour mettre à jour logs/streaks)
-  toggleHabit: async (id: string): Promise<Habit> => {
-    const res = await api.patch<Habit>(`/habits/${id}`);
+  /**
+   * Toggle pour une habitude principale
+   * Renvoie l'habit complet + les éventuels badges débloqués
+   */
+  toggleHabit: async (id: string): Promise<HabitActionResponse> => {
+    const res = await api.patch<HabitActionResponse>(`/habits/${id}`);
     return res.data;
   },
 
-  // Toggle pour une SOUS-ÉTAPE (Renvoie aussi l'habit complet pour le calendrier)
-  toggleStep: async (stepId: string): Promise<Habit> => {
-    const res = await api.patch<Habit>(`/habits/step/${stepId}`);
+  /**
+   * Toggle pour une SOUS-ÉTAPE
+   * Si c'est la dernière étape, peut aussi renvoyer des badges
+   */
+  toggleStep: async (stepId: string): Promise<HabitActionResponse> => {
+    const res = await api.patch<HabitActionResponse>(`/habits/step/${stepId}`);
     return res.data;
   },
 

@@ -11,9 +11,12 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { 
   Trophy, Target, Zap, Calendar, Mail, Edit2, Save, 
- TrendingUp, Lock, Camera, X, CheckCircle2 
+  TrendingUp, Camera, X, Award, Lock, CheckCircle2 
 } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { BadgesGallery } from "@/components/badges/BadgesGallery"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { toast } from "sonner"
@@ -48,7 +51,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
   }, [open, user])
 
   const handleUpdate = async () => {
-    if (editData.password !== editData.confirmPassword) {
+    if (editData.password && editData.password !== editData.confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas !")
       return
     }
@@ -72,10 +75,10 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="right" 
-        className="p-0 w-full sm:max-w-[50vw] h-full overflow-y-auto border-l border-border/60 bg-background"
+        className="p-0 w-full sm:max-w-[50vw] h-full flex flex-col border-l border-border/60 bg-background"
       >
-        
-        <div className="relative h-48 sm:h-64 w-full bg-slate-900 overflow-visible">
+        {/* HEADER / COVER IMAGE */}
+        <div className="relative h-48 sm:h-64 w-full bg-slate-900 shrink-0">
           <div 
             className="absolute inset-0 opacity-80 bg-cover bg-center bg-no-repeat transition-all duration-500"
             style={{ 
@@ -86,22 +89,14 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
           
           <div className="absolute -bottom-14 left-10 flex items-end gap-6 z-10">
-            <div 
-              className="relative group cursor-pointer" 
-              onClick={() => setIsEditing(true)}
-            >
+            <div className="relative group cursor-pointer" onClick={() => setIsEditing(true)}>
               <Avatar className="h-32 w-32 sm:h-44 sm:w-44 rounded-3xl border-[8px] border-background shadow-2xl bg-background overflow-hidden transition-transform group-hover:scale-[1.02]">
                 <AvatarImage src={isEditing ? editData.avatar : user?.avatar} className="object-cover" />
                 <AvatarFallback className="text-4xl rounded-3xl bg-muted font-black text-foreground">{user?.name?.[0]}</AvatarFallback>
               </Avatar>
-              
               <div className="absolute inset-0 bg-black/40 rounded-3xl flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm">
                 <Camera className="text-white h-8 w-8 mb-2" />
                 <span className="text-white text-[10px] font-black uppercase tracking-tighter">Modifier</span>
-              </div>
-
-              <div className="absolute -bottom-1 -right-1 p-1 bg-white/40 backdrop-blur-sm rounded-lg border border-white/20 opacity-30 group-hover:opacity-100 transition-opacity">
-                <Edit2 className="h-3 w-3 text-slate-500" />
               </div>
             </div>
             
@@ -113,84 +108,104 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
           </div>
         </div>
 
-        <div className="mt-24 px-10 space-y-10 pb-12 text-foreground relative z-0">
-          
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1 w-full max-w-md">
-                {isEditing ? (
-                  <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Nom du Hunter</label>
-                      <Input value={editData.name} onChange={(e) => setEditData({...editData, name: e.target.value})} className="text-xl font-black italic uppercase bg-muted border-border" />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">URL de l'Avatar</label>
-                      <Input value={editData.avatar} onChange={(e) => setEditData({...editData, avatar: e.target.value})} className="text-xs font-mono bg-muted border-border" placeholder="https://..." />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* CONTENT AREA */}
+        <ScrollArea className="flex-1 mt-16">
+          <div className="px-10 space-y-8 pb-12">
+            
+            {/* NAME & INFO SECTION */}
+            <div className="flex flex-col gap-6 pt-6">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1 w-full max-w-md">
+                  {isEditing ? (
+                    <div className="space-y-4 animate-in fade-in duration-300">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase text-muted-foreground">Nouveau Mot de Passe</label>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input type="password" value={editData.password} onChange={(e) => setEditData({...editData, password: e.target.value})} className="pl-10 bg-muted border-border" placeholder="••••••••" />
+                        <label className="text-[10px] font-bold uppercase text-muted-foreground">Nom du Hunter</label>
+                        <Input value={editData.name} onChange={(e) => setEditData({...editData, name: e.target.value})} className="text-xl font-black italic uppercase bg-muted border-border" />
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold uppercase text-muted-foreground">URL de l'Avatar</label>
+                        <Input value={editData.avatar} onChange={(e) => setEditData({...editData, avatar: e.target.value})} className="text-xs font-mono bg-muted border-border" placeholder="https://..." />
+                      </div>
+
+                      {/* PASSWORD FIELDS RETABLISHED */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase text-muted-foreground">Nouveau Mot de Passe</label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input type="password" value={editData.password} onChange={(e) => setEditData({...editData, password: e.target.value})} className="pl-10 bg-muted border-border" placeholder="••••••••" />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase text-muted-foreground">Confirmer</label>
+                          <div className="relative">
+                            <CheckCircle2 className={`absolute left-3 top-2.5 h-4 w-4 ${editData.password && editData.password === editData.confirmPassword ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                            <Input type="password" value={editData.confirmPassword} onChange={(e) => setEditData({...editData, confirmPassword: e.target.value})} className="pl-10 bg-muted border-border" placeholder="••••••••" />
+                          </div>
                         </div>
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase text-muted-foreground">Confirmer</label>
-                        <div className="relative">
-                          <CheckCircle2 className={`absolute left-3 top-2.5 h-4 w-4 ${editData.password && editData.password === editData.confirmPassword ? 'text-emerald-500' : 'text-muted-foreground'}`} />
-                          <Input type="password" value={editData.confirmPassword} onChange={(e) => setEditData({...editData, confirmPassword: e.target.value})} className="pl-10 bg-muted border-border" placeholder="••••••••" />
-                        </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <Button onClick={handleUpdate} className="bg-primary text-primary-foreground flex-1 gap-2 font-bold uppercase text-xs h-10 tracking-widest">
+                          <Save className="h-4 w-4" /> Sauvegarder
+                        </Button>
+                        <Button onClick={() => setIsEditing(false)} variant="outline" className="h-10 px-4">
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="flex gap-2 pt-4">
-                      <Button onClick={handleUpdate} className="bg-primary text-primary-foreground hover:opacity-90 flex-1 gap-2 font-bold uppercase text-xs tracking-widest h-11">
-                        <Save className="h-4 w-4" /> Sauvegarder
-                      </Button>
-                      <Button onClick={() => setIsEditing(false)} variant="outline" className="gap-2 font-bold uppercase text-xs tracking-widest h-11">
-                        <X className="h-4 w-4" /> Annuler
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-3 group">
-                      <h2 className="text-4xl font-black italic tracking-tighter uppercase text-foreground">{user?.name}</h2>
-                      <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="text-muted-foreground hover:text-primary transition-colors">
-                        <Edit2 className="h-5 w-5" />
-                      </Button>
-                    </div>
-                    <div className="flex flex-col gap-1">
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-4xl font-black italic tracking-tighter uppercase text-foreground">{user?.name}</h2>
+                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="text-muted-foreground hover:text-primary">
+                          <Edit2 className="h-5 w-5" />
+                        </Button>
+                      </div>
                       <p className="text-muted-foreground font-medium flex items-center gap-2">
                         <Mail className="h-4 w-4" /> {user?.email}
                       </p>
-                    </div>
-                  </>
+                    </>
+                  )}
+                </div>
+                {!isEditing && (
+                  <div className="hidden sm:flex items-center gap-2 text-[10px] font-bold text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-lg border border-border shadow-sm uppercase tracking-widest">
+                    <Calendar className="h-3.5 w-3.5" />
+                    Éveillé : {stats?.createdAt ? format(new Date(stats.createdAt), "dd MMM yyyy", { locale: fr }) : "..."}
+                  </div>
                 )}
               </div>
-
-              {!isEditing && (
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground bg-muted/50 px-4 py-2.5 rounded-xl border border-border shadow-sm">
-                  <Calendar className="h-4 w-4" />
-                  Éveillé : {stats?.createdAt ? format(new Date(stats.createdAt), "dd MMM yyyy", { locale: fr }) : "..."}
-                </div>
-              )}
             </div>
-          </div>
 
-          <Separator className="bg-border" />
+            <Separator className="bg-border/60" />
 
-          {/* STATS GRID */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <StatBox label="Puissance (XP)" value={stats?.totalXP?.toLocaleString() || "0"} icon={<Zap className="size-4 text-amber-500 fill-amber-500/20" />} footerBold="Gain constant" footerSub="Niveau d'énergie totale" trend="Niveau" />
-            <StatBox label="Missions" value={stats?.totalGoals || "0"} icon={<Target className="size-4 text-indigo-500 fill-indigo-500/20" />} footerBold="Objectifs actifs" footerSub="Missions entreprises" trend="Acceptées" />
-            <StatBox label="Succès" value={stats?.completedGoals || "0"} icon={<Trophy className="size-4 text-emerald-500 fill-emerald-500/20" />} footerBold="Missions finies" footerSub="Rapport de réussite" trend="100%" />
+            {/* TABS SECTION */}
+            <Tabs defaultValue="stats" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 mb-8">
+                <TabsTrigger value="stats" className="font-black uppercase italic tracking-tighter gap-2 text-xs">
+                  <TrendingUp className="h-3.5 w-3.5" /> Statistiques
+                </TabsTrigger>
+                <TabsTrigger value="badges" className="font-black uppercase italic tracking-tighter gap-2 text-xs">
+                  <Award className="h-3.5 w-3.5" /> Archives des Succès
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="stats" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <StatBox label="Puissance (XP)" value={stats?.totalXP?.toLocaleString() || "0"} icon={<Zap className="size-4 text-amber-500 fill-amber-500/20" />} footerBold="Gain constant" footerSub="Énergie totale" trend="Niveau" />
+                  <StatBox label="Missions" value={stats?.totalGoals || "0"} icon={<Target className="size-4 text-indigo-500 fill-indigo-500/20" />} footerBold="Quêtes actives" footerSub="Contrats acceptés" trend="Acceptées" />
+                  <StatBox label="Succès" value={stats?.completedGoals || "0"} icon={<Trophy className="size-4 text-emerald-500 fill-emerald-500/20" />} footerBold="Missions finies" footerSub="Rapport de réussite" trend="100%" />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="badges" className="animate-in fade-in slide-in-from-bottom-2 duration-400">
+                <BadgesGallery />
+              </TabsContent>
+            </Tabs>
+
           </div>
-        </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   )
@@ -198,7 +213,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
 
 function StatBox({ label, value, icon, footerBold, footerSub, trend }: any) {
   return (
-    <Card className="relative overflow-hidden border border-border bg-gradient-to-t from-primary/5 to-card shadow-sm transition-all hover:shadow-md">
+    <Card className="relative overflow-hidden border border-border bg-gradient-to-t from-primary/5 to-card shadow-sm">
       <CardHeader className="pb-2">
         <CardDescription className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest text-muted-foreground">
           {icon} {label}

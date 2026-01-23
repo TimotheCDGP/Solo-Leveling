@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateHabitDto } from './dto/create-habit.dto';
+import { BadgesService } from '../badges/badges.service';
 
 @Injectable()
 export class HabitsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly badgesService: BadgesService,
+  ) { }
 
   async createHabit(dto: CreateHabitDto, userId: string) {
     return this.prisma.habit.create({
@@ -74,7 +78,6 @@ export class HabitsService {
 
   /**
    * Toggle une étape spécifique
-   * Mis à jour pour renvoyer l'Habit COMPLET
    */
   async toggleHabitStep(stepId: string, userId: string) {
     const step = await this.prisma.habitStep.findUnique({
@@ -93,23 +96,22 @@ export class HabitsService {
     today.setHours(0, 0, 0, 0);
 
     return this.prisma.$transaction(async (tx) => {
-      // 1. Update de l'étape
       await tx.habitStep.update({
         where: { id: stepId },
         data: { isCompleted: newStatus },
       });
 
       const habit = step.habit;
+      let newBadges: any[] = [];
       
-      // 2. Si TOUTES les étapes sont finies : On valide l'Habit et on crée un LOG
       if (allStepsCompleted && !habit.isCompletedToday) {
-        await tx.habit.update({
+        const updatedHabit = await tx.habit.update({
           where: { id: habit.id },
           data: {
             isCompletedToday: true,
             currentStreak: { increment: 1 },
             lastCompletedAt: new Date(),
-            habitLogs: { create: { date: new Date() } }
+            habitLogs: { create: { date: new Date(), isCompleted: true } }
           },
         });
         
@@ -117,8 +119,12 @@ export class HabitsService {
             where: { id: userId },
             data: { xp: { increment: habit.xpReward } }
         });
+
+        // Déclenchement des badges liés aux habitudes
+        const streakBadges = await this.badgesService.checkStreakBadges(userId, updatedHabit.currentStreak);
+        const completionBadges = await this.badgesService.checkHabitCompletionBadges(userId);
+        newBadges = [...(streakBadges || []), ...(completionBadges || [])];
       }
-      // 3. Si on décoche une étape alors que l'Habit était fini : On dévalide et supprime le LOG
       else if (!allStepsCompleted && habit.isCompletedToday) {
         await tx.habit.update({
           where: { id: habit.id },
@@ -138,11 +144,12 @@ export class HabitsService {
         });
       }
 
-      // RETOUR : On renvoie l'habit complet pour le Frontend
-      return tx.habit.findUnique({
+      const finalHabit = await tx.habit.findUnique({
         where: { id: habit.id },
         include: { steps: { orderBy: { order: 'asc' } }, habitLogs: true }
       });
+
+      return { habit: finalHabit, newBadges };
     });
   }
 
@@ -169,17 +176,26 @@ export class HabitsService {
     today.setHours(0, 0, 0, 0);
 
     return this.prisma.$transaction(async (tx) => {
+      let newBadges: any[] = [];
+
       if (newStatus) {
-        await tx.habit.update({
+        const updatedHabit = await tx.habit.update({
           where: { id: habitId },
           data: { 
             isCompletedToday: true, 
             currentStreak: { increment: 1 }, 
             lastCompletedAt: new Date(),
-            habitLogs: { create: { date: new Date() } }
+            habitLogs: { create: { date: new Date(), isCompleted: true } }
           }
         });
+        
         await tx.user.update({ where: { id: userId }, data: { xp: { increment: habit.xpReward } } });
+        
+        // Déclenchement des badges
+        const streakBadges = await this.badgesService.checkStreakBadges(userId, updatedHabit.currentStreak);
+        const completionBadges = await this.badgesService.checkHabitCompletionBadges(userId);
+        newBadges = [...(streakBadges || []), ...(completionBadges || [])];
+        
       } else {
         await tx.habit.update({
           where: { id: habitId },
@@ -191,10 +207,12 @@ export class HabitsService {
         await tx.user.update({ where: { id: userId }, data: { xp: { decrement: habit.xpReward } } });
       }
 
-      return tx.habit.findUnique({
+      const finalHabit = await tx.habit.findUnique({
         where: { id: habitId },
         include: { steps: { orderBy: { order: 'asc' } }, habitLogs: true }
       });
+
+      return { habit: finalHabit, newBadges };
     });
   }
 
