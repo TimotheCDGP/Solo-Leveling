@@ -21,12 +21,18 @@ export class UsersController {
 
         const userId = req.user.id;
         return this.usersService.getProfileStats(userId);
-        
+
     }
-    
+
     @UseGuards(JwtAuthGuard)
     @Get('stats')
     getStats(@GetUser() user: { id: string }) {
-      return this.usersService.getDashboardStats(user.id);
+        return this.usersService.getDashboardStats(user.id);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('export')
+    async exportData(@GetUser() user: { id: string }) {
+        return this.usersService.exportUserData(user.id);
     }
 }
