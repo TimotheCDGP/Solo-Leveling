@@ -156,7 +156,7 @@ model Badge {
   name        String   @unique
   description String
   icon        String // URL ou nom de l'icône
-  condition   String // ex: "7_days_streak", "10_goals_completed"
+  condition   String   @unique// ex: "7_days_streak", "10_goals_completed"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

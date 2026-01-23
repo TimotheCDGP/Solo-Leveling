@@ -20,10 +20,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { 
   Quote, CheckCircle2, RotateCcw, Loader2, 
   ChevronLeft, Pencil, Save, Flame, Trash2,
-  Heart, Zap, Leaf, Brain, LayoutGrid, Plus, Lock
+  Heart, Zap, Leaf, Brain, LayoutGrid, Plus, Lock, Check
 } from "lucide-react";
 
 import { HabitService } from "@/services/habit.service"; 
+import { showBadgeUnlock } from "@/components/badges/BadgeNotification";
 import { toast } from "sonner";
 import type { Habit } from "@/types/habit";
 
@@ -40,7 +41,8 @@ export function HabitDetailsModal({ habit: initialHabit, isOpen, onClose, onUpda
   const [newStepTitle, setNewStepTitle] = useState("");
   const [isAddingStep, setIsAddingStep] = useState(false);
 
-  const [editingStepId] = useState<string | null>(null);
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
+  const [tempStepTitle, setTempStepTitle] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<{
     title: string;
@@ -90,9 +92,16 @@ export function HabitDetailsModal({ habit: initialHabit, isOpen, onClose, onUpda
 
     setIsLoading(true);
     try {
-      const updatedHabit = await HabitService.toggleHabit(habit.id) as Habit;
+      // Destructuration de la réponse { habit, newBadges }
+      const { habit: updatedHabit, newBadges } = await HabitService.toggleHabit(habit.id);
+      
       setHabit(updatedHabit);
-      onUpdate(updatedHabit); // Notifie le parent (liste) immédiatement
+      onUpdate(updatedHabit); 
+
+      // Affichage des badges si présents
+      if (newBadges && newBadges.length > 0) {
+        newBadges.forEach((badge: any) => showBadgeUnlock(badge.name));
+      }
       
       if (updatedHabit.isCompletedToday) {
         toast.success(`Mission accomplie ! (+${habit.xpReward} XP)`);
@@ -108,15 +117,33 @@ export function HabitDetailsModal({ habit: initialHabit, isOpen, onClose, onUpda
   };
 
   const handleToggleStep = async (stepId: string) => {
-    if (!habit || editingStepId) return;
-
+    if (!habit) return;
     try {
-        const updatedHabit = await HabitService.toggleStep(stepId) as Habit;
+        const { habit: updatedHabit, newBadges } = await HabitService.toggleStep(stepId);
         setHabit(updatedHabit);
-        onUpdate(updatedHabit); // Si cette étape complète l'habit, la liste sera à jour
+        onUpdate(updatedHabit);
+
+        if (newBadges && newBadges.length > 0) {
+          newBadges.forEach((badge: any) => showBadgeUnlock(badge.name));
+        }
     } catch (e) {
         toast.error("Erreur de mise à jour de l'étape");
     }
+  };
+
+  const saveStepTitle = async (stepId: string) => {
+    if (!tempStepTitle.trim() || !habit) {
+        setEditingStepId(null);
+        return;
+    }
+    try {
+        await HabitService.updateStep(stepId, tempStepTitle);
+        const updatedSteps = habit.steps.map(s => s.id === stepId ? { ...s, title: tempStepTitle } : s);
+        const newHabitState = { ...habit, steps: updatedSteps };
+        setHabit(newHabitState);
+        onUpdate(newHabitState);
+        setEditingStepId(null);
+    } catch (e) { toast.error("Erreur modification"); }
   };
 
   const handleAddStep = async () => {
@@ -143,7 +170,6 @@ export function HabitDetailsModal({ habit: initialHabit, isOpen, onClose, onUpda
     } catch (e) { toast.error("Erreur suppression"); }
   };
 
-  // Transformation des logs en dates utilisables pour le calendrier
   const completedDates = habit.habitLogs?.map(log => 
     typeof log.date === 'string' ? parseISO(log.date) : new Date(log.date)
   ) || [];
@@ -250,33 +276,74 @@ export function HabitDetailsModal({ habit: initialHabit, isOpen, onClose, onUpda
                                         >
                                             <span>{date.getDate()}</span>
                                         </button>
-                                        {isCompleted && <Flame className="absolute -top-1 -right-1 h-4 w-4 text-orange-500 fill-orange-500 animate-in zoom-in duration-300 drop-shadow-sm" />}
+                                        {isCompleted && <Flame className="absolute -top-1 -right-1 h-4 w-4 text-orange-500 fill-orange-500 animate-in zoom-in" />}
                                     </div>
                                 );
                             }
                         }}
+                        className="rounded-md"
                     />
                 </div>
             </div>
 
             <div className="space-y-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Objectifs Secondaires</h4>
+                <div className="flex items-center gap-2 pb-2">
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Objectifs Secondaires</h4>
+                  <Badge variant="outline" className="text-[10px] h-5 font-bold">
+                    {habit.steps?.filter(s => s.isCompleted).length}/{habit.steps?.length || 0}
+                  </Badge>
+                </div>
                 <div className="space-y-2">
                     {habit.steps?.map((step) => (
-                        <div key={step.id} className={cn("group flex items-center justify-between p-3 rounded-lg border bg-card hover:border-primary/50")}>
+                        <div key={step.id} className={cn(
+                          "group flex items-center justify-between p-3 rounded-lg border bg-card transition-all",
+                          editingStepId === step.id ? "border-primary shadow-sm" : "hover:border-primary/50"
+                        )}>
                             <div className="flex items-center gap-3 flex-1">
-                                <Checkbox 
-                                    checked={step.isCompleted} 
-                                    onCheckedChange={() => handleToggleStep(step.id)} 
-                                    className="size-5 border-2"
-                                />
-                                <span className={cn("text-sm font-semibold tracking-tight", step.isCompleted && "line-through text-muted-foreground opacity-50")}>
-                                    {step.title}
-                                </span>
+                                {editingStepId !== step.id && (
+                                  <Checkbox 
+                                      checked={step.isCompleted} 
+                                      onCheckedChange={() => handleToggleStep(step.id)} 
+                                      className="size-5 border-2"
+                                  />
+                                )}
+                                
+                                {editingStepId === step.id ? (
+                                    <div className="flex items-center gap-2 w-full">
+                                        <Input 
+                                            autoFocus
+                                            value={tempStepTitle}
+                                            onChange={(e) => setTempStepTitle(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') saveStepTitle(step.id);
+                                                if (e.key === 'Escape') setEditingStepId(null);
+                                            }}
+                                            className="h-8 py-1 flex-1 border-none focus-visible:ring-0 shadow-none p-0 bg-transparent font-medium"
+                                        />
+                                        <Button size="icon" variant="ghost" className="h-7 w-7 text-green-600" onClick={() => saveStepTitle(step.id)}>
+                                            <Check className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div 
+                                        className="flex items-center gap-2 flex-1 cursor-pointer"
+                                        onClick={() => {
+                                            setEditingStepId(step.id);
+                                            setTempStepTitle(step.title);
+                                        }}
+                                    >
+                                        <span className={cn("text-sm font-semibold tracking-tight transition-all", step.isCompleted && "line-through text-muted-foreground opacity-50")}>
+                                            {step.title}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 transition-opacity" onClick={() => handleDeleteStep(step.id)}>
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+                            
+                            {editingStepId !== step.id && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 transition-opacity" onClick={() => handleDeleteStep(step.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
                         </div>
                     ))}
                     <div className="flex gap-2 mt-4">

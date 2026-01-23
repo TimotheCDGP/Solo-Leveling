@@ -22,6 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
 const data = {
   navMain: [
@@ -53,9 +54,13 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar 
+      collapsible="icon" 
+      className={cn("bg-background border-r border-border/50", className)} 
+      {...props}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -64,9 +69,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Zap className="text-[--brand] fill-[--brand]/20 size-4" />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Hunter Leveling</span>
-                  <span className="truncate text-xs">Level Up Your Life</span>
+                <div className="grid flex-1 text-left text-sm leading-tight italic font-oswald uppercase">
+                  <span className="truncate font-black tracking-tighter text-lg">Hunter Leveling</span>
+                  <span className="truncate text-[10px] font-bold opacity-70">System UI v1.0</span>
                 </div>
               </a>
             </SidebarMenuButton>
